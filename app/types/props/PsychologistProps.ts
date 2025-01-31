@@ -1,5 +1,5 @@
 export type PsychologistProps = {
-    id: number;
+    id: string;
     slug: string;
     name: string;
     image: string;

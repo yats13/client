@@ -10,10 +10,10 @@ interface SpecialistSelectorComponentProps extends SpecialistSelectorProps {
 }
 
 const SpecialistSelector: React.FC<SpecialistSelectorComponentProps> = ({ psychologists, onSpecialistSelect }) => {
-    const [selectedSpecialist, setSelectedSpecialist] = useState<number | null>(null);
+    const [selectedSpecialist, setSelectedSpecialist] = useState<string | null>(null);
 
     const handleSpecialistClick = (psychologist: PsychologistProps) => {
-        setSelectedSpecialist(psychologist.id);
+        setSelectedSpecialist(psychologist.slug);
         onSpecialistSelect(psychologist);
     };
 
@@ -25,7 +25,7 @@ const SpecialistSelector: React.FC<SpecialistSelectorComponentProps> = ({ psycho
                     <div
                         key={psychologist.slug}
                         className={`rounded-3xl cursor-pointer hover:opacity-80 ${
-                            selectedSpecialist === psychologist.id ? 'opacity-100' : 'opacity-30'
+                            selectedSpecialist === psychologist.slug ? 'opacity-100' : 'opacity-30'
                         }`}
                         onClick={() => handleSpecialistClick(psychologist)}
                     >
