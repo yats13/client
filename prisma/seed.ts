@@ -1,5 +1,3 @@
-// prisma/seed.tsnpx prisma migrate dev --name update-appointment-timestam
-
 import { PrismaClient } from '@prisma/client';
 import { PsychologistProps } from '@/app/types/props/PsychologistProps';
 

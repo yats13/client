@@ -8,7 +8,7 @@ datasource db {
 }
 
 model psychologist {
-  id          String    @id @default(uuid())
+  id          String @id @default(uuid())
   slug        String @unique
   name        String
   image       String
