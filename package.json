@@ -3,11 +3,12 @@
   "version": "1.1.1",
   "private": true,
   "scripts": {
+    "postinstall": "prisma generate",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "vercel-build": "prisma generate && prisma migrate deploy && next build && node scripts/generate-sitemap.js",
+    "sitemap-build": "node scripts/generate-sitemap.js"
   },
   "dependencies": {
     "@fortawesome/react-fontawesome": "^0.2.2",
