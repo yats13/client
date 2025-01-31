@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { validateAppointment } from '@/app/types/utils/validateAppointment';
+import { createGoogleCalendarEvent } from '@/app/types/services/googleCalendarService';
 
 interface AppointmentFormState {
     name: string;
@@ -48,6 +49,7 @@ export function useAppointmentForm() {
             return;
         }
 
+        // Prepare form data
         const formDataToSend = new FormData();
         formDataToSend.append('name', formData.name);
         formDataToSend.append('email', formData.email);
@@ -56,16 +58,25 @@ export function useAppointmentForm() {
         formDataToSend.append('time', selectedTime);
         formDataToSend.append('psychologistSlug', psychologistSlug);
 
-        const result = await submitAppointment(formDataToSend);
+        try {
+            // Submit the appointment to your backend
+            const result = await submitAppointment(formDataToSend);
 
-        if (result.success) {
-            setMessage('Запись успешно отправлена!');
-            setIsSuccess(true);
-        } else {
-            setMessage(result.error || 'Ошибка при отправке формы.');
+            if (result.success) {
+                // Create event in Google Calendar
+                await createGoogleCalendarEvent(formData, selectedDate, selectedTime, psychologistSlug);
+
+                setMessage('Запись успешно отправлена!');
+                setIsSuccess(true);
+            } else {
+                setMessage(result.error || 'Ошибка при отправке формы.');
+            }
+        } catch (error) {
+            setMessage('Ошибка при создании события в календаре.');
+            console.error('Google Calendar Error:', error);
+        } finally {
+            setIsSubmitting(false);
         }
-
-        setIsSubmitting(false);
     };
 
     return { formData, handleChange, handleSubmit, isSubmitting, message, isSuccess };
