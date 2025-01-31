@@ -2,7 +2,7 @@ import "@/app/globals.css";
 import Header from "./components/header";
 import Footer from "./components/footer";
 import ClientLayout from '@/app/components/ClientLayout';
-
+import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PT_Serif, PT_Sans_Narrow } from "next/font/google";
 
 const ptSansNarrow = PT_Sans_Narrow({
