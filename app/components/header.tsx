@@ -13,7 +13,6 @@ const Menu = dynamic(() => import("./menu"), { ssr: false });
 export default function Header() {
     const [isMenuVisible, setIsMenuVisible] = useState(false);
     const pathname = usePathname();
-    console.log(pathname);
     const mainColor = clsx({
         "white": pathname === "/",
         "zinc-900": pathname !== "/"

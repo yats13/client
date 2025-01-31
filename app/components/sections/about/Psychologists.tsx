@@ -7,7 +7,7 @@ export default async function Psychologists() {
     return (
         <div className="flex justify-around mb-20 bg-lightPurple py-20">
             {psychologists.map((psychologist) => (
-                <PsychologistsCard key={psychologist.id} psychologist={psychologist} />
+                <PsychologistsCard key={psychologist.slug} psychologist={psychologist} />
             ))}
         </div>
     );
