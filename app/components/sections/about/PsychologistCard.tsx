@@ -5,7 +5,7 @@ import { PsychologistProps } from '@/app/types/props/PsychologistProps';
 import LinkTo from '@/app/components/link-to';
 import type { psychologist } from '@prisma/client';
 
-export default function PsychologistCard({psychologist}: {psychologist:PsychologistProps}) {
+export default function PsychologistCard({ psychologist }: { psychologist: psychologist }) {
     return (
         <div className="max-w-md mx-auto bg-white rounded-3xl shadow-md overflow-hidden md:max-w-2xl">
             <div className="md:flex">

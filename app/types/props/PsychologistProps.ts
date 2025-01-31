@@ -1,4 +1,5 @@
 export type PsychologistProps = {
+    id: number;
     slug: string;
     name: string;
     image: string;
@@ -8,5 +9,5 @@ export type PsychologistProps = {
     phone: string;
     bg_color: string;
     visit_type: string;
-    locale: string
-}
+    locale: string;
+};
