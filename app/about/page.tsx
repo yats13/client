@@ -1,6 +1,6 @@
 import PageTitle from '../components/page-titile'
 import TextSection from '../components/sections/about/TextSection'
-import Psychologists from '@/app/components/sections/about/Psychologists'
+import Psychologists from '../components/sections/about/Psychologists'
 
 export const metadata = {
     title: "О нас | Психолог Онлайн",
