@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { validateAppointment } from '@/app/types/utils/validateAppointment';
-import { createGoogleCalendarEvent } from '@/app/types/services/googleCalendarService';
 
 interface AppointmentFormState {
     name: string;
@@ -9,7 +8,7 @@ interface AppointmentFormState {
     agree: boolean;
 }
 
-export function useAppointmentForm() {
+export function useAppointmentFormService() {
     const [formData, setFormData] = useState<AppointmentFormState>({
         name: '',
         email: '',
@@ -63,8 +62,26 @@ export function useAppointmentForm() {
             const result = await submitAppointment(formDataToSend);
 
             if (result.success) {
-                // Create event in Google Calendar
-                await createGoogleCalendarEvent(formData, selectedDate, selectedTime, psychologistSlug);
+                // Send data to the Next.js API route for Google Calendar event creation
+                const response = await fetch('/api/google-calendar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: formData.name,
+                        email: formData.email,
+                        phone: formData.phone,
+                        selectedDate,
+                        selectedTime,
+                        psychologistSlug
+                    })
+                });
+
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.message || 'Ошибка при создании события в календаре');
+                }
 
                 setMessage('Запись успешно отправлена!');
                 setIsSuccess(true);
@@ -73,7 +90,7 @@ export function useAppointmentForm() {
             }
         } catch (error) {
             setMessage('Ошибка при создании события в календаре.');
-            console.error('Google Calendar Error:', error);
+            console.error('Google Calendar API Error:', error);
         } finally {
             setIsSubmitting(false);
         }

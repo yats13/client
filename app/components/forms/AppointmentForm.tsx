@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useAppointmentForm } from '@/app/types/services/useAppointmentFormService';
+import { useFormState, useFormStatus } from "react-dom";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
@@ -11,9 +11,13 @@ interface AppointmentFormProps {
     selectedTime: string;
     psychologistSlug: string;
 }
-
+const initialState = {
+    success: false,
+    message: '',
+};
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selectedTime, psychologistSlug }) => {
-    const { formData, handleChange, handleSubmit, isSubmitting, message, isSuccess } = useAppointmentForm();
+    const [state, formAction] = useFormState(submitAppointment, initialState);
+    const { pending } = useFormStatus();
 
     return (
         <form onSubmit={(e) => handleSubmit(e, selectedDate, selectedTime, psychologistSlug, submitAppointment)}>
