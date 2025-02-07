@@ -6,11 +6,7 @@ export default createMiddleware({
     locales,
     defaultLocale,
     localePrefix: 'always',
-    localeDetection: true,
-    defaultLocale: (request) => {
-        const acceptLanguage = request.headers.get('accept-language');
-        return getPreferredLocale(acceptLanguage);
-    }
+    localeDetection: true
 });
 
 export const config = {

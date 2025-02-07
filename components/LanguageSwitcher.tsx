@@ -3,13 +3,13 @@
 import { useLocale } from 'next-intl';
 import { usePathname, useRouter } from 'next-intl/client';
 import { locales } from '@/config/i18n';
-import { useTransitions } from 'next-intl';
+import { useTransition } from 'react';
 
 export default function LanguageSwitcher() {
     const locale = useLocale();
     const router = useRouter();
     const pathname = usePathname();
-    const { startTransition } = useTransitions();
+    const [isPending, startTransition] = useTransition();
 
     const handleChange = (newLocale: string) => {
         startTransition(() => {

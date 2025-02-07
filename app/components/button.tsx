@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import {ButtonProps} from '../types/props/ButtonProps';
 import {ButtonVariant} from '../types/enums/ButtonVariant';
 import {Color} from '../types/enums/Color';
 import Status from './status';
