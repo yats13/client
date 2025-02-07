@@ -1,7 +1,6 @@
 'use server';
 
-import { google } from 'googleapis';
-import dotenv from 'dotenv';
+import { createGoogleCalendarEvent } from '../services/googleCalendar';
 
 interface AppointmentResponse {
     name: string;
@@ -14,24 +13,15 @@ interface AppointmentResponse {
     createdAt: Date;
 }
 
-dotenv.config();
-
-const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
-);
-
-oauth2Client.setCredentials({ 
-    refresh_token: process.env.GOOGLE_REFRESH_TOKEN 
-});
-
-const calendar = google.calendar({ 
-    version: 'v3', 
-    auth: oauth2Client
-});
-
 export async function submitAppointment(formData: FormData) {
+    if (typeof window !== 'undefined') {
+        return { 
+            success: false, 
+            error: 'This action can only be performed on the server',
+            appointment: undefined
+        };
+    }
+
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         return { 
             success: false, 
@@ -45,32 +35,12 @@ export async function submitAppointment(formData: FormData) {
         const email = formData.get('email') as string;
         const phone = formData.get('phone') as string;
         const dateTime = new Date(formData.get('selectedDate') as string);
-        const psychologistSlug = formData.get('psychologistSlug') as string;
 
-        const event = {
-            summary: `Психологическая консультация - ${name}`,
-            description: `Email: ${email}\nТелефон: ${phone}`,
-            start: {
-                dateTime: dateTime.toISOString(),
-                timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
-            },
-            end: {
-                dateTime: new Date(dateTime.getTime() + 60*60*1000).toISOString(),
-                timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
-            },
-            attendees: [{ email }],
-            conferenceData: {
-                createRequest: {
-                    requestId: `${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                    conferenceSolutionKey: { type: 'hangoutsMeet' }
-                }
-            }
-        };
-
-        const response = await calendar.events.insert({
-            calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
-            requestBody: event,
-            conferenceDataVersion: 1
+        const response = await createGoogleCalendarEvent({
+            name,
+            email,
+            phone,
+            dateTime
         });
 
         return { 
@@ -79,7 +49,7 @@ export async function submitAppointment(formData: FormData) {
                 name,
                 email,
                 phone,
-                psychologistSlug,
+                psychologistSlug: formData.get('psychologistSlug') as string,
                 id: response.data.id!,
                 dateTime,
                 meetLink: response.data.hangoutLink,
