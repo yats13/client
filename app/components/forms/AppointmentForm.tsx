@@ -11,74 +11,78 @@ interface AppointmentFormProps {
     selectedTime: string;
     psychologistSlug: string;
 }
+
+// Update initialState to match the return type of submitAppointment
 const initialState = {
     success: false,
-    message: '',
+    error: '',
 };
+
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selectedTime, psychologistSlug }) => {
-    const [state, formAction] = useFormState(submitAppointment, initialState);
+    // Create a bound version of submitAppointment that includes our props
+    const boundSubmitAppointment = async (prevState: typeof initialState, formData: FormData) => {
+        formData.append('selectedDate', selectedDate.toISOString());
+        formData.append('selectedTime', selectedTime);
+        formData.append('psychologistSlug', psychologistSlug);
+        return submitAppointment(formData);
+    };
+
+    const [state, formAction] = useFormState(boundSubmitAppointment, initialState);
     const { pending } = useFormStatus();
 
     return (
-        <form onSubmit={(e) => handleSubmit(e, selectedDate, selectedTime, psychologistSlug, submitAppointment)}>
+        <form action={formAction}>
             <div className="flex justify-around m-5 gap-3 text-gray-700">
-                {isSuccess ? (
+                {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
-                        Имя: {formData.name}
+                        Имя: {state.appointment?.name}
                     </p>
                 ) : (
                     <input
                         type="text"
-                        id="name"
+                        name="name"
                         placeholder="Имя"
-                        value={formData.name}
-                        onChange={handleChange}
                         className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
-                        disabled={isSuccess}
+                        disabled={state.success}
                     />
                 )}
 
-                {isSuccess ? (
+                {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
-                        Email: {formData.email}
+                        Email: {state.appointment?.email}
                     </p>
                 ) : (
                     <input
                         type="email"
-                        id="email"
+                        name="email"
                         placeholder="Email"
-                        value={formData.email}
-                        onChange={handleChange}
                         className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
-                        disabled={isSuccess}
+                        disabled={state.success}
                     />
                 )}
 
-                {isSuccess ? (
+                {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
-                        Телефон: {formData.phone}
+                        Телефон: {state.appointment?.phone}
                     </p>
                 ) : (
                     <input
                         type="tel"
-                        id="phone"
+                        name="phone"
                         placeholder="Телефон"
-                        value={formData.phone}
-                        onChange={handleChange}
                         className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
-                        disabled={isSuccess}
+                        disabled={state.success}
                     />
                 )}
             </div>
 
-            {!isSuccess && <div className="flex items-center m-5">
+            {!state.success && <div className="flex items-center m-5">
                 <input
                     id="agree"
+                    name="agree"
                     type="checkbox"
-                    checked={formData.agree}
-                    onChange={handleChange}
                     className="w-4 h-4 text-mint rounded-sm accent-mint"
-                    disabled={isSuccess}
+                    disabled={state.success}
                 />
                 <label htmlFor="agree" className="ms-2 text-sm font-medium text-primary">
                     Подтверждаю обработку данных
@@ -86,17 +90,19 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
             </div>}
 
             <div className='flex justify-center my-3'>
-                {isSuccess ? (
+                {state.success ? (
                     <p className="bg-mint py-2 px-4 rounded-full font-bold text-lg">Запись успешно отправлена!</p>
                 ) : (
                     <Button
-                        label={isSubmitting ? "Отправка..." : "Записаться"}
+                        label={pending ? "Отправка..." : "Записаться"}
                         variant={ButtonVariant.Outline}
                     />
                 )}
             </div>
 
-            {message && !isSuccess && <p className="py-2 text-center text-sm text-primary bg-purple">{message}</p>}
+            {state.error && !state.success && (
+                <p className="py-2 text-center text-sm text-primary bg-purple">{state.error}</p>
+            )}
         </form>
     );
 };

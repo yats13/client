@@ -18,15 +18,18 @@ export async function POST(req: Request) {
     try {
         const { name, email, phone, selectedDate, selectedTime, psychologistSlug } = await req.json();
 
+        // Format start and end times in local timezone
         const event = {
             summary: `Консультация с ${psychologistSlug}`,
             description: `Клиент: ${name}\nEmail: ${email}\nТелефон: ${phone}`,
             start: {
-                dateTime: new Date(`${selectedDate}T${selectedTime}:00Z`).toISOString(),
+                dateTime: `${selectedDate}T${selectedTime}:00`,
                 timeZone: process.env.TIMEZONE || 'Europe/Warsaw'
             },
             end: {
-                dateTime: new Date(new Date(`${selectedDate}T${selectedTime}:00Z`).getTime() + 60 * 60 * 1000).toISOString(),
+                // Explicitly type parameters to fix TypeScript errors
+                dateTime: `${selectedDate}T${selectedTime.split(':').map((n: string, i: number) => 
+                    i === 0 ? String(Number(n) + 1).padStart(2, '0') : n).join(':')}:00`,
                 timeZone: process.env.TIMEZONE || 'Europe/Warsaw'
             },
             attendees: [{ email }],
@@ -41,10 +44,15 @@ export async function POST(req: Request) {
 
         const response = await calendar.events.insert({
             calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
-            resource: event
+            requestBody: event  // Changed from 'resource' to 'requestBody'
         });
 
-        return NextResponse.json({ success: true, eventId: response.data.id });
+        // Handle the response type correctly
+        if (response.data?.id) {
+            return NextResponse.json({ success: true, eventId: response.data.id });
+        }
+        throw new Error('Failed to create event');
+
     } catch (error) {
         console.error('Google Calendar Error:', error);
         return NextResponse.json({ success: false, message: 'Ошибка при создании события в календаре' }, { status: 500 });
