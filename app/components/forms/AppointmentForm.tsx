@@ -5,6 +5,7 @@ import { useFormStatus } from "react-dom";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
+import { useFormState } from "react-dom";
 
 interface AppointmentFormProps {
     selectedDate: Date;
@@ -27,7 +28,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
         return submitAppointment(formData);
     };
 
-    const [state, formAction] = useActionState(boundSubmitAppointment, initialState);
+    const [state, formAction] = useFormState(boundSubmitAppointment, initialState);
     const { pending } = useFormStatus();
 
     return (
