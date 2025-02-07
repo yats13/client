@@ -9,12 +9,10 @@ interface StatusProps {
 
 const Status: React.FC<StatusProps> = ({ color }) => {
     return (
-        <div
-            className="w-4 h-4 rounded-full mr-2"
-            style={{
-                backgroundColor: color,
-            }}
-        ></div>
+        <div 
+            className="rounded-full w-1 h-1 p-2 mr-2"
+            style={{ backgroundColor: color }}
+        />
     );
 };
 

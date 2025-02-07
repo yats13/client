@@ -33,12 +33,11 @@ const Button: React.FC<ButtonProps> = ({ label, variant }) => {
 
     return (
         <button
-            className="rounded-full pl-6 pr-8 py-2 pointer flex justify-stretch items-center"
+            className="rounded-full px-6 py-2 pointer flex items-center gap-2"
             style={getButtonStyle()}
         >
-            {/* Status Component with Glow on Button Hover */}
             <Status color={Color.Mint} />
-            <span className="block">{label}</span>
+            <span>{label}</span>
         </button>
     );
 };

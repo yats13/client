@@ -41,7 +41,7 @@ const Accordion: React.FC<AccordionProps> = ({
                         }`}
                     >
                         <div className="flex flex-col">
-                            <h3 className="text-lg font-semibold text-primary">
+                            <h3 className="text-lg font-semibold text-purple">
                                 {item.title}
                             </h3>
                             {item.subtitle && (

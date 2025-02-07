@@ -9,7 +9,7 @@ import ServiceContent from '@/app/components/sections/services/service-content';
 import BackgroundImage from '@/app/components/background-image';
 import { sectionsData } from '@/app/components/sections/services/sections-data';
 import GroupButtons from '../../group-buttons';
-
+import Accordion from '@/app/components/Accordion';
 const ServicesSection: React.FC = () => {
   const [activeSection, setActiveSection] = useState<string>('individualConsultation');
 
@@ -26,9 +26,26 @@ const ServicesSection: React.FC = () => {
         <SectionPageTitle text="Услуги" />
       </div>
       <BackgroundImage className="absolute -top-5 overflow-hidden left-0 transform scale-x-[-1]" imageUrl="/images/lavender.jpg" />
-
       <div className='bg-gray-400 bg-opacity-10 backdrop-filter backdrop-blur-lg shadow-md'>
-        <div className="flex container mx-auto pt-40 pb-10 justify-center items-center">
+        {/* Mobile Accordion View */}
+      <div className="md:hidden mb-10">
+      <Accordion 
+                        items={sectionsData.map((section, index) => ({
+                            id: index + 1,
+                            title: section.title,
+                            subtitle: '',
+                            content: (
+                                <div className="space-y-4">
+                                    <p className="text-gray-600">
+                                        {section.content}
+                                    </p>
+                                </div>
+                            )
+                        }))}
+                        defaultOpenId={1}
+                    />
+      </div>
+        <div className="hidden md:flex container mx-auto pt-40 pb-10 justify-center items-center">
           <ServiceContent activeSection={activeSection} />
           <div className="relative block-right">
             {sectionsData.map((section) => (

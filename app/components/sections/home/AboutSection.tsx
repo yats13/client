@@ -12,7 +12,7 @@ const AboutSection: React.FC = () => {
     <section id="about" className="bg-light-grey text-start relative z-10 py-8 -mt-28">
       <SectionPageTitle text="О нас" />
       <div className="container mx-auto flex flex-col md:flex-row items-start">
-        <div className="block-left w-full md:w-1/2 px-4 md:pl-0 self-center">
+        <div className="block-left w-full md:w-1/2 p-10 md:pl-0 self-center">
           <h3 className="underline decoration-mint decoration-4 text-2xl text-purple pt-3">
             Наш подход
           </h3>
@@ -30,17 +30,18 @@ const AboutSection: React.FC = () => {
           <p>
             Мы создаем пространство, где каждый может исследовать свои тревоги и внутренние конфликты. Наш подход сочетает глубокую работу над личными установками с поиском практических решений. Мы верим, что каждый человек способен обрести гармонию, если его вовремя поддержать. Онлайн-формат консультаций дает возможность быть рядом, где бы вы ни находились, и сопровождать вас на пути к осознанию и внутреннему покою.
           </p>
-          <div className="mt-10">
+          <div className="mt-5 md:mt-10">
             <LinkTo label="Продолжить" href="/about" variant={ButtonVariant.Primary} />
           </div>
         </div>
-        <div className="block-right md:w-1/2 flex justify-center mt-0 lg:-mt-24 ">
-          <div className="relative w-full lg:w-3/4">
+        <div className="block-right md:w-1/2 flex justify-center mt-24">
+          <div className="relative w-full lg:w-3/4 aspect-[3/4]">
             <Image
               src="/images/about-us-home.png"
               alt="About Us"
               className="object-cover"
               fill
+              sizes="(max-width: 768px) 100vw, 50vw"
               priority
             />
           </div>
