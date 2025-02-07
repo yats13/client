@@ -45,8 +45,9 @@ export async function submitAppointment(formData: FormData) {
         };
 
         await calendar.events.insert({
+            auth: oauth2Client,
             calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
-            resource: event,
+            requestBody: event,
         });
 
         return { success: true, message: 'Запись успешно отправлена!' };
