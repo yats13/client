@@ -1,38 +1,45 @@
 import { PrismaClient } from '@prisma/client';
-import { PsychologistProps } from '@/app/types/props/PsychologistProps';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  const psychologist: Omit<PsychologistProps, 'id'>[] = [
+  // First clear existing data
+  await prisma.psychologist.deleteMany();
+
+  // Create psychologists with unique slugs
+  const psychologists = [
     {
-      slug: "yatskovska",
-      name: "Мария Яцковская",
-      image: "/images/maria.jpg",
-      title: "Психолог",
-      description: "Специалист по транзакционному анализу и психотерапии. Помогает клиентам находить гармонию и решать внутренние конфликты.",
-      email: "mk.yatskovskaya@gmail.com",
-      phone: "536066390",
-      bg_color: "bg-purple",
-      visit_type: "Онлайн",
-      locale: "ru"
+      name: 'Мария Яцковская',
+      slug: 'yatskovska',
+      title: 'Психолог',
+      description: 'Опытный специалист в области корпоративных психологий',
+      image: '/images/psychologists/maria.jpg',
+      email: 'mk.yatskovskaya@gmail.com',
+      phone: '536066390',
+      bg_color: 'bg-purple',
+      visit_type: 'Онлайн',
+      locale: 'ru'
     },
     {
-      slug: "bentsa",
-      name: "Дария Бенца",
-      image: "/images/daria.jpg",
-      title: "Психолог",
-      description: "Работает с тревожностью, стрессом и эмоциональными проблемами. Предлагает индивидуальные решения для улучшения качества жизни.",
-      email: "dara.bentsa@gmail.com",
-      phone: "536066392",
-      bg_color: "bg-mint",
-      visit_type: "Онлайн",
-      locale: "ru"
-    }
+      name: 'Дария Бенца',
+      slug: 'bentsa',
+      title: 'Психолог',
+      description: 'Опытный специалист в области семейной терапии',
+      image: '/images/psychologists/daria.jpg',
+      email: 'dara.bentsa@gmail.com',
+      phone: '536066392',
+      bg_color: 'bg-mint',
+      visit_type: 'Онлайн',
+      locale: 'ru'
+    },
+    // Add more psychologists as needed
   ];
 
-  await prisma.psychologist.createMany({ data: psychologist });
-  console.log("Seed data inserted successfully");
+  for (const psychologist of psychologists) {
+    await prisma.psychologist.create({
+      data: psychologist,
+    });
+  }
 }
 
 main()
