@@ -20,19 +20,25 @@ export async function POST(req: Request) {
 
         // Create event time in RFC3339 format with the correct timezone
         const timezone = process.env.TIMEZONE || 'Europe/Warsaw';
+        const startDateTime = formatToRFC3339(`${selectedDate}T${selectedTime}:00`, timezone);
+        const endDateTime = formatToRFC3339(
+            `${selectedDate}T${selectedTime.split(':')
+                .map((n: string, i: number) => i === 0 
+                    ? String(Number(n) + 1).padStart(2, '0') 
+                    : n)
+                .join(':')}:00`,
+            timezone
+        );
+
         const event = {
             summary: `Консультация с ${psychologistSlug}`,
             description: `Клиент: ${name}\nEmail: ${email}\nТелефон: ${phone}`,
             start: {
-                dateTime: `${selectedDate}T${selectedTime}:00`,
+                dateTime: startDateTime,
                 timeZone: timezone
             },
             end: {
-                dateTime: `${selectedDate}T${selectedTime.split(':')
-                    .map((n: string, i: number) => i === 0 
-                        ? String(Number(n) + 1).padStart(2, '0') 
-                        : n)
-                    .join(':')}:00`,
+                dateTime: endDateTime,
                 timeZone: timezone
             },
             attendees: [{ email }],
@@ -62,21 +68,55 @@ export async function POST(req: Request) {
     }
 }
 
-// Add this helper function at the end of the file
-function getTimezoneOffset(): string {
-    const timezone = process.env.TIMEZONE || 'Europe/Warsaw';
-    const date = new Date();
+/**
+ * Formats a datetime string to RFC3339 format with proper timezone offset
+ * @param dateTimeStr - DateTime string in format "YYYY-MM-DDTHH:mm:ss"
+ * @param timezone - IANA timezone string (e.g., 'Europe/Warsaw')
+ * @returns RFC3339 formatted datetime string
+ */
+function formatToRFC3339(dateTimeStr: string, timezone: string): string {
+    const date = new Date(dateTimeStr);
+    
+    // Create a formatter for the specified timezone
     const formatter = new Intl.DateTimeFormat('en-US', {
         timeZone: timezone,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: false,
         timeZoneName: 'longOffset'
     });
-    const timeZoneParts = formatter.formatToParts(date).find(part => part.type === 'timeZoneName');
-    if (!timeZoneParts?.value) return '+00:00';
-    
-    // Convert "GMT+2" or "GMT+02:00" format to "+02:00" format
-    const offset = timeZoneParts.value.replace('GMT', '');
-    if (offset.includes(':')) return offset;
-    
-    const hours = offset.slice(0, -2).padStart(2, '0');
-    return `${offset[0]}${hours}:00`;
+
+    // Get timezone offset
+    const timeZoneParts = formatter.formatToParts(date);
+    const timeZonePart = timeZoneParts.find(part => part.type === 'timeZoneName');
+    let offset = timeZonePart?.value || '+00:00';
+
+    // Clean up the offset format
+    offset = offset.replace('GMT', '');
+    if (!offset.includes(':')) {
+        // Handle single digit offsets (e.g., +2, -5)
+        const hours = offset.replace(/[+-]/, '');
+        const sign = offset.startsWith('-') ? '-' : '+';
+        offset = `${sign}${hours.padStart(2, '0')}:00`;
+    } else {
+        // Handle offsets that already include minutes (e.g., +02:30)
+        const [sign, ...rest] = offset;
+        offset = `${sign}${rest.join('').padStart(5, '0')}`;
+    }
+
+    // Format the date components
+    const parts = formatter.formatToParts(date);
+    const dateParts: { [key: string]: string } = {};
+    parts.forEach(part => {
+        if (part.type !== 'literal' && part.type !== 'timeZoneName') {
+            dateParts[part.type] = part.value;
+        }
+    });
+
+    // Construct the RFC3339 string
+    return `${dateParts.year}-${dateParts.month}-${dateParts.day}T${dateParts.hour}:${dateParts.minute}:${dateParts.second}${offset}`;
 }

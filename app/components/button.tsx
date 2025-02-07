@@ -6,6 +6,12 @@ import {ButtonVariant} from '../types/enums/ButtonVariant';
 import {Color} from '../types/enums/Color';
 import Status from './status';
 
+interface ButtonProps {
+    label: string;
+    variant: ButtonVariant;
+    className?: string;  // Make className optional
+}
+
 const Button: React.FC<ButtonProps> = ({ label, variant }) => {
     // Apply styles based on the variant
     const getButtonStyle = () => {

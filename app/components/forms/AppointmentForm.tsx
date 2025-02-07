@@ -1,11 +1,10 @@
 'use client';
 
-import React, { useActionState } from 'react';
-import { useFormStatus } from "react-dom";
+import React from 'react';
+import { useFormState, useFormStatus } from "react-dom";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
-import { useFormState } from "react-dom";
 
 interface AppointmentFormProps {
     selectedDate: Date;
@@ -13,15 +12,29 @@ interface AppointmentFormProps {
     psychologistSlug: string;
 }
 
-// Update initialState to match the return type of submitAppointment
-const initialState = {
+interface AppointmentResponse {
+    name: string;
+    email: string;
+    phone: string;
+    psychologistSlug: string;
+    id: string;
+    dateTime: Date;
+    createdAt: Date;
+}
+
+interface FormState {
+    success: boolean;
+    error?: string;
+    appointment?: AppointmentResponse;
+}
+
+const initialState: FormState = {
     success: false,
-    error: '',
+    error: undefined,
 };
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selectedTime, psychologistSlug }) => {
-    // Create a bound version of submitAppointment that includes our props
-    const boundSubmitAppointment = async (prevState: typeof initialState, formData: FormData) => {
+    const boundSubmitAppointment = async (prevState: FormState, formData: FormData) => {
         formData.append('selectedDate', selectedDate.toISOString());
         formData.append('selectedTime', selectedTime);
         formData.append('psychologistSlug', psychologistSlug);
