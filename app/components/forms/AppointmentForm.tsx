@@ -5,6 +5,7 @@ import { useActionState, useOptimistic } from "react";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
+import { motion } from 'motion/react';
 
 interface AppointmentFormProps {
     selectedDate: Date;
@@ -121,9 +122,15 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
             </div>
 
             {state.error && !state.success && (
-                <p className="py-2 px-4 text-center text-sm text-primary bg-purple rounded-lg">
+                <motion.p 
+                    initial={{ y: 50, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: 50, opacity: 0 }}
+                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    className="py-2 text-center text-sm text-primary bg-purple rounded-t-3xl w-full"
+                >
                     {state.error}
-                </p>
+                </motion.p>
             )}
         </form>
     );

@@ -36,9 +36,9 @@ const ServicesSection: React.FC = () => {
                             subtitle: '',
                             content: (
                                 <div className="space-y-4">
-                                    <p className="text-gray-600">
+                                    <div className="text-gray-600">
                                         {section.content}
-                                    </p>
+                                    </div>
                                 </div>
                             )
                         }))}

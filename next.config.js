@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  // ... other config
+  sassOptions: {
+    includePaths: ['./scss'],
+  }
 }
 
 module.exports = nextConfig 
