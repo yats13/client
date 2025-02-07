@@ -1,0 +1,14 @@
+{
+  "common": {
+    "switchLocale": "Switch language",
+    "nav": {
+      "home": "Home",
+      "about": "About",
+      "contact": "Contact"
+    }
+  },
+  "home": {
+    "title": "Welcome",
+    "description": "This is the home page"
+  }
+} 
