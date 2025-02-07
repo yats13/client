@@ -1,6 +1,14 @@
+import { AppointmentResponse } from '@/app/types/props/AppointmentResponse';
 import { google } from 'googleapis';
 
-const calendar = google.calendar({ version: 'v3', auth: process.env.GOOGLE_API_KEY });
+const oauth2Client = new google.auth.OAuth2(
+    process.env.GOOGLE_CLIENT_ID,
+    process.env.GOOGLE_CLIENT_SECRET,
+    process.env.GOOGLE_REDIRECT_URI
+);
+oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
+
+const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
 
 export async function createCalendarEvent(appointment: AppointmentResponse) {
     const event = {
@@ -8,22 +16,26 @@ export async function createCalendarEvent(appointment: AppointmentResponse) {
         description: `Email: ${appointment.email}\nТелефон: ${appointment.phone}`,
         start: {
             dateTime: appointment.dateTime.toISOString(),
-            timeZone: 'Europe/Moscow',
+            timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
         },
         end: {
-            dateTime: new Date(appointment.dateTime.getTime() + 60*60*1000).toISOString(), // 1 hour duration
-            timeZone: 'Europe/Moscow',
+            dateTime: new Date(appointment.dateTime.getTime() + 60*60*1000).toISOString(),
+            timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
         },
+        attendees: [{ email: appointment.email }],
+        conferenceData: {
+            createRequest: {
+                requestId: `${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                conferenceSolutionKey: { type: 'hangoutsMeet' }
+            }
+        }
     };
 
-    try {
-        const response = await calendar.events.insert({
-            calendarId: process.env.GOOGLE_CALENDAR_ID,
-            requestBody: event,
-        });
-        return response.data;
-    } catch (error) {
-        console.error('Error creating calendar event:', error);
-        throw error;
-    }
+    const response = await calendar.events.insert({
+        calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
+        requestBody: event,
+        conferenceDataVersion: 1
+    });
+
+    return response.data;
 } 

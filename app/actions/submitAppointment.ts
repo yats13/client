@@ -3,6 +3,17 @@
 import { google } from 'googleapis';
 import dotenv from 'dotenv';
 
+interface AppointmentResponse {
+    name: string;
+    email: string;
+    phone: string;
+    psychologistSlug: string;
+    id: string;
+    dateTime: Date;
+    meetLink?: string;
+    createdAt: Date;
+}
+
 dotenv.config();
 
 const oauth2Client = new google.auth.OAuth2(
