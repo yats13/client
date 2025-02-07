@@ -1,7 +1,7 @@
 'use client';
 
-import React from 'react';
-import { useFormState, useFormStatus } from "react-dom";
+import React, { useActionState } from 'react';
+import { useFormStatus } from "react-dom";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
@@ -27,14 +27,14 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
         return submitAppointment(formData);
     };
 
-    const [state, formAction] = useFormState(boundSubmitAppointment, initialState);
+    const [state, formAction] = useActionState(boundSubmitAppointment, initialState);
     const { pending } = useFormStatus();
 
     return (
-        <form action={formAction}>
-            <div className="flex justify-around m-5 gap-3 text-gray-700">
+        <form action={formAction} className="w-full max-w-md mx-auto px-4">
+            <div className="flex flex-col md:flex-row md:justify-around gap-4 my-5">
                 {state.success ? (
-                    <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
+                    <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
                         Имя: {state.appointment?.name}
                     </p>
                 ) : (
@@ -42,13 +42,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                         type="text"
                         name="name"
                         placeholder="Имя"
-                        className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
+                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
                         disabled={state.success}
                     />
                 )}
 
                 {state.success ? (
-                    <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
+                    <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
                         Email: {state.appointment?.email}
                     </p>
                 ) : (
@@ -56,13 +56,13 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                         type="email"
                         name="email"
                         placeholder="Email"
-                        className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
+                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
                         disabled={state.success}
                     />
                 )}
 
                 {state.success ? (
-                    <p className="text-gray-700 bg-transparent rounded-full px-6 py-2">
+                    <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
                         Телефон: {state.appointment?.phone}
                     </p>
                 ) : (
@@ -70,38 +70,45 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                         type="tel"
                         name="phone"
                         placeholder="Телефон"
-                        className="border border-gray-500 bg-transparent rounded-full px-6 placeholder-gray-500"
+                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
                         disabled={state.success}
                     />
                 )}
             </div>
 
-            {!state.success && <div className="flex items-center m-5">
-                <input
-                    id="agree"
-                    name="agree"
-                    type="checkbox"
-                    className="w-4 h-4 text-mint rounded-sm accent-mint"
-                    disabled={state.success}
-                />
-                <label htmlFor="agree" className="ms-2 text-sm font-medium text-primary">
-                    Подтверждаю обработку данных
-                </label>
-            </div>}
+            {!state.success && (
+                <div className="flex items-center justify-center my-5">
+                    <input
+                        id="agree"
+                        name="agree"
+                        type="checkbox"
+                        className="w-4 h-4 text-mint rounded-sm accent-mint"
+                        disabled={state.success}
+                    />
+                    <label htmlFor="agree" className="ms-2 text-sm font-medium text-primary">
+                        Подтверждаю обработку данных
+                    </label>
+                </div>
+            )}
 
-            <div className='flex justify-center my-3'>
+            <div className='flex justify-center my-5'>
                 {state.success ? (
-                    <p className="bg-mint py-2 px-4 rounded-full font-bold text-lg">Запись успешно отправлена!</p>
+                    <p className="bg-mint py-2 px-6 rounded-full font-bold text-lg text-center">
+                        Запись успешно отправлена!
+                    </p>
                 ) : (
                     <Button
                         label={pending ? "Отправка..." : "Записаться"}
                         variant={ButtonVariant.Outline}
+                        className="w-full md:w-auto"
                     />
                 )}
             </div>
 
             {state.error && !state.success && (
-                <p className="py-2 text-center text-sm text-primary bg-purple">{state.error}</p>
+                <p className="py-2 px-4 text-center text-sm text-primary bg-purple rounded-lg">
+                    {state.error}
+                </p>
             )}
         </form>
     );

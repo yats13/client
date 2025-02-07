@@ -29,11 +29,11 @@ const SubmitSelected: React.FC<SubmitSelectedProps> = ({selectedDate, selectedTi
                     alt={selectedSpecialist.name}
                     width={384}
                     height={512}
-                    className="w-24 h-24 md:w-48 md:h-auto mx-auto rounded-l-3xl"
+                    className="md:w-24 md:h-24 md:w-48 md:h-auto mx-auto rounded-full md:rounded-l-3xl"
                 />
-                <div className="flex flex-col bg-gray-900 bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-r-3xl">
-                    <div className='pl-5 flex justify-between bg-gray-900 bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-r-3xl'>
-                        <div className="flex flex-col justify-center px-5 gap-3">
+                <div className="flex flex-col bg-gray-900 bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-3xl md:rounded-r-3xl">
+                    <div className='pl-5 flex justify-between bg-gray-900 bg-opacity-10 backdrop-filter backdrop-blur-lg rounded-t-3xl md:rounded-r-3xl'>
+                        <div className="flex flex-col justify-center px-5 gap-3 rounded-t-3xl md:rounded-none">
                             <h3 className="font-serif font-bold text-3xl">
                                 {selectedSpecialist.name}
                             </h3>

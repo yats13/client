@@ -12,7 +12,7 @@ const AboutSection: React.FC = () => {
     <section id="about" className="bg-light-grey text-start relative z-10 py-8 -mt-28">
       <SectionPageTitle text="О нас" />
       <div className="container mx-auto flex flex-col md:flex-row items-start">
-        <div className="block-left w-full md:w-1/2 pr-4 self-center">
+        <div className="block-left w-full md:w-1/2 px-4 md:pl-0 self-center">
           <h3 className="underline decoration-mint decoration-4 text-2xl text-purple pt-3">
             Наш подход
           </h3>
