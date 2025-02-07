@@ -16,16 +16,26 @@ interface AppointmentResponse {
 
 dotenv.config();
 
-const oauth2Client = new google.auth.OAuth2(
-    process.env.GOOGLE_CLIENT_ID,
-    process.env.GOOGLE_CLIENT_SECRET,
-    process.env.GOOGLE_REDIRECT_URI
-);
-oauth2Client.setCredentials({ refresh_token: process.env.GOOGLE_REFRESH_TOKEN });
-
-const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+const calendar = google.calendar({ 
+    version: 'v3', 
+    auth: new google.auth.OAuth2(
+        process.env.GOOGLE_CLIENT_ID,
+        process.env.GOOGLE_CLIENT_SECRET,
+        process.env.GOOGLE_REDIRECT_URI
+    ).setCredentials({ 
+        refresh_token: process.env.GOOGLE_REFRESH_TOKEN 
+    })
+});
 
 export async function submitAppointment(formData: FormData) {
+    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return { 
+            success: false, 
+            error: 'Ошибка конфигурации сервера',
+            appointment: undefined
+        };
+    }
+
     try {
         const name = formData.get('name') as string;
         const email = formData.get('email') as string;
