@@ -1,17 +1,20 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { motion } from "motion/react"
+
 import React from 'react';
 
 interface AnimatedTextProps {
   text: string;
+  block?: string;
   className?: string;
   delay?: number;
 }
 
-const AnimatedText: React.FC<AnimatedTextProps> = ({ text, className = '', delay = 0 }) => {
+const AnimatedText: React.FC<AnimatedTextProps> = ({ text, block = 'span', className = '', delay = 0 }) => {
+  const Component = (motion as any)[block];
   return (
-    <motion.span
+    <Component
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
@@ -22,7 +25,7 @@ const AnimatedText: React.FC<AnimatedTextProps> = ({ text, className = '', delay
       className={className}
     >
       {text}
-    </motion.span>
+    </Component>
   );
 };
 

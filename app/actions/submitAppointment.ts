@@ -19,19 +19,18 @@ export async function submitAppointment(formData: FormData) {
         const name = formData.get('name') as string;
         const email = formData.get('email') as string;
         const phone = formData.get('phone') as string;
-        const selectedDate = formData.get('selectedDate') as string;
-        const selectedTime = formData.get('selectedTime') as string;
+        const dateTime = new Date(formData.get('selectedDate') as string);
         const psychologistSlug = formData.get('psychologistSlug') as string;
 
         const event = {
             summary: `Консультация с ${psychologistSlug}`,
             description: `Клиент: ${name}\nEmail: ${email}\nТелефон: ${phone}`,
             start: {
-                dateTime: new Date(`${selectedDate}T${selectedTime}:00Z`).toISOString(),
+                dateTime: dateTime.toISOString(),
                 timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
             },
             end: {
-                dateTime: new Date(new Date(`${selectedDate}T${selectedTime}:00Z`).getTime() + 60 * 60 * 1000).toISOString(),
+                dateTime: new Date(dateTime.getTime() + 60 * 60 * 1000).toISOString(),
                 timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
             },
             attendees: [{ email }],
@@ -42,17 +41,41 @@ export async function submitAppointment(formData: FormData) {
                     { method: 'popup', minutes: 30 },
                 ],
             },
+            conferenceData: {
+                createRequest: {
+                    requestId: `${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                    conferenceSolutionKey: { type: 'hangoutsMeet' }
+                }
+            }
         };
 
-        await calendar.events.insert({
+        const response = await calendar.events.insert({
             auth: oauth2Client,
             calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
             requestBody: event,
+            conferenceDataVersion: 1
         });
 
-        return { success: true, message: 'Запись успешно отправлена!' };
+        return { 
+            success: true, 
+            appointment: {
+                name,
+                email,
+                phone,
+                psychologistSlug,
+                id: response.data.id!,
+                dateTime,
+                meetLink: response.data.hangoutLink,
+                createdAt: new Date()
+            },
+            message: 'Запись успешно отправлена!' 
+        };
     } catch (error) {
-        console.error('Google Calendar Error:', error);
-        return { success: false, message: 'Ошибка при создании события в календаре' };
+        console.error('Error:', error);
+        return { 
+            success: false, 
+            error: 'Ошибка при создании записи',
+            appointment: undefined
+        };
     }
 }

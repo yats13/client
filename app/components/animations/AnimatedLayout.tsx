@@ -12,6 +12,7 @@ export default function AnimatedLayout({ children }: { children: React.ReactNode
                 exit={{ opacity: 0 }}
                 transition={{ duration: 0.3 }}
             >
+            
                 {children}
             </motion.main>
         </AnimatePresence>

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState, useOptimistic } from "react";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
@@ -41,8 +41,8 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
         return submitAppointment(formData);
     };
 
-    const [state, formAction] = useFormState(boundSubmitAppointment, initialState);
-    const { pending } = useFormStatus();
+    const [state, formAction] = useActionState(boundSubmitAppointment, initialState);
+    const [optimistic, addOptimistic] = useOptimistic(false);
 
     return (
         <form action={formAction} className="w-full max-w-md mx-auto px-4">
@@ -112,9 +112,10 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                     </p>
                 ) : (
                     <Button
-                        label={pending ? "Отправка..." : "Записаться"}
+                        label={optimistic ? "Отправка..." : "Записаться"}
                         variant={ButtonVariant.Outline}
                         className="w-full md:w-auto"
+                        type="submit"
                     />
                 )}
             </div>
