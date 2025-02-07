@@ -4,6 +4,7 @@ import Footer from "./components/footer";
 import ClientLayout from '@/app/components/ClientLayout';
 import { SpeedInsights } from "@vercel/speed-insights/next"
 import { PT_Serif, PT_Sans_Narrow } from "next/font/google";
+import AnimatedLayout from '@/app/components/animations/AnimatedLayout';
 
 const ptSansNarrow = PT_Sans_Narrow({
   weight: "400",
@@ -19,14 +20,16 @@ const ptSerif = PT_Serif({
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-      <html lang="ru" className={ptSansNarrow.className} suppressHydrationWarning>
+    <html lang="ru" className={ptSansNarrow.className} suppressHydrationWarning>
       <body className={`${ptSerif.className} flex flex-col justify-between min-h-screen`} suppressHydrationWarning>
-      <Header />
-      <ClientLayout />
-      {children}
-      <Footer />
-      <SpeedInsights/>
+        <AnimatedLayout>
+          <Header />
+          <ClientLayout />
+          {children}
+        </AnimatedLayout>
+        <Footer />
+        <SpeedInsights/>
       </body>
-      </html>
+    </html>
   );
 }
