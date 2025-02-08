@@ -1,46 +1,67 @@
-import { google } from 'googleapis';
+import { calendar_v3, google } from 'googleapis';
+import { OAuth2Client } from 'google-auth-library';
+import { env, validateEnv } from '@/app/lib/env';
 
-export async function createGoogleCalendarEvent(eventData: {
+interface EventData {
     name: string;
     email: string;
     phone: string;
     dateTime: Date;
-}) {
-    const oauth2Client = new google.auth.OAuth2(
-        process.env.GOOGLE_CLIENT_ID,
-        process.env.GOOGLE_CLIENT_SECRET,
-        process.env.GOOGLE_REDIRECT_URI
-    );
+}
 
-    oauth2Client.setCredentials({ 
-        refresh_token: process.env.GOOGLE_REFRESH_TOKEN 
-    });
+let oauth2Client: OAuth2Client | null = null;
 
-    const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+function getOAuth2Client(): OAuth2Client {
+    validateEnv();
+    
+    if (!oauth2Client) {
+        oauth2Client = new google.auth.OAuth2({
+            clientId: env.google.clientId,
+            clientSecret: env.google.clientSecret,
+            redirectUri: env.google.redirectUri
+        });
 
-    const event = {
-        summary: `Психологическая консультация - ${eventData.name}`,
-        description: `Email: ${eventData.email}\nТелефон: ${eventData.phone}`,
-        start: {
-            dateTime: eventData.dateTime.toISOString(),
-            timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
-        },
-        end: {
-            dateTime: new Date(eventData.dateTime.getTime() + 60*60*1000).toISOString(),
-            timeZone: process.env.TIMEZONE || 'Europe/Warsaw',
-        },
-        attendees: [{ email: eventData.email }],
-        conferenceData: {
-            createRequest: {
-                requestId: `${Date.now()}_${Math.random().toString(36).substring(7)}`,
-                conferenceSolutionKey: { type: 'hangoutsMeet' }
+        oauth2Client.setCredentials({
+            refresh_token: env.google.refreshToken
+        });
+    }
+    return oauth2Client;
+}
+
+export async function createGoogleCalendarEvent(eventData: EventData): Promise<calendar_v3.Schema$Event> {
+    try {
+        const calendar = google.calendar('v3');
+        
+        const event: calendar_v3.Schema$Event = {
+            summary: `Психологическая консультация - ${eventData.name}`,
+            description: `Email: ${eventData.email}\nТелефон: ${eventData.phone}`,
+            start: {
+                dateTime: eventData.dateTime.toISOString(),
+                timeZone: env.google.timezone
+            },
+            end: {
+                dateTime: new Date(eventData.dateTime.getTime() + 60*60*1000).toISOString(),
+                timeZone: env.google.timezone
+            },
+            attendees: [{ email: eventData.email }],
+            conferenceData: {
+                createRequest: {
+                    requestId: `${Date.now()}_${Math.random().toString(36).substring(7)}`,
+                    conferenceSolutionKey: { type: 'hangoutsMeet' }
+                }
             }
-        }
-    };
+        };
 
-    return calendar.events.insert({
-        calendarId: process.env.GOOGLE_CALENDAR_ID || 'primary',
-        requestBody: event,
-        conferenceDataVersion: 1
-    });
+        const { data } = await calendar.events.insert({
+            auth: getOAuth2Client(),
+            calendarId: env.google.calendarId,
+            requestBody: event,
+            conferenceDataVersion: 1
+        });
+
+        return data;
+    } catch (error) {
+        console.error('Google Calendar API Error:', error);
+        throw error;
+    }
 } 

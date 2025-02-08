@@ -13,19 +13,25 @@ interface AppointmentResponse {
     createdAt: Date;
 }
 
-export async function submitAppointment(formData: FormData) {
-    if (typeof window !== 'undefined') {
-        return { 
-            success: false, 
-            error: 'This action can only be performed on the server',
-            appointment: undefined
-        };
-    }
+export type FormState = {
+    success: boolean;
+    error?: string;
+    appointment?: AppointmentResponse;
+}
 
+export const initialState: FormState = {
+    success: false,
+    error: '',
+    appointment: undefined
+};
+
+export async function submitAppointment(
+    formData: FormData
+): Promise<FormState> {
     if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
         return { 
             success: false, 
-            error: 'Ошибка конфигурации сервера',
+            error: 'Ошибка конфигурации сервера не удалось получить данные из .env',
             appointment: undefined
         };
     }
@@ -36,7 +42,7 @@ export async function submitAppointment(formData: FormData) {
         const phone = formData.get('phone') as string;
         const dateTime = new Date(formData.get('selectedDate') as string);
 
-        const response = await createGoogleCalendarEvent({
+        const event = await createGoogleCalendarEvent({
             name,
             email,
             phone,
@@ -50,9 +56,9 @@ export async function submitAppointment(formData: FormData) {
                 email,
                 phone,
                 psychologistSlug: formData.get('psychologistSlug') as string,
-                id: response.data.id!,
+                id: event.id ?? '',
                 dateTime,
-                meetLink: response.data.hangoutLink,
+                meetLink: event.hangoutLink ?? undefined,
                 createdAt: new Date()
             }
         };
@@ -60,8 +66,7 @@ export async function submitAppointment(formData: FormData) {
         console.error('Error:', error);
         return { 
             success: false, 
-            error: 'Ошибка при создании записи',
-            appointment: undefined
+            error: 'Ошибка при создании записи'
         };
     }
 }
