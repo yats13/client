@@ -5,7 +5,7 @@ import { useActionState, useOptimistic } from "react";
 import { submitAppointment } from '@/app/types/services/submitAppointmentService';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
-import { motion } from 'motion/react';
+import { motion } from 'framer-motion';
 
 interface AppointmentFormProps {
     selectedDate: Date;
