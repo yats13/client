@@ -62,35 +62,14 @@ export function useAppointmentFormService() {
             const result = await submitAppointment(formDataToSend);
 
             if (result.success) {
-                // Send data to the Next.js API route for Google Calendar event creation
-                const response = await fetch('/api/google-calendar', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        name: formData.name,
-                        email: formData.email,
-                        phone: formData.phone,
-                        selectedDate,
-                        selectedTime,
-                        psychologistSlug
-                    })
-                });
-
-                const data = await response.json();
-                if (!response.ok) {
-                    throw new Error(data.message || 'Ошибка при создании события в календаре');
-                }
-
                 setMessage('Запись успешно отправлена!');
                 setIsSuccess(true);
             } else {
                 setMessage(result.error || 'Ошибка при отправке формы.');
             }
         } catch (error) {
-            setMessage('Ошибка при создании события в календаре.');
-            console.error('Google Calendar API Error:', error);
+            setMessage('Ошибка при создании записи.');
+            console.error('Error creating appointment:', error);
         } finally {
             setIsSubmitting(false);
         }

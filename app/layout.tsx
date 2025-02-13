@@ -1,5 +1,6 @@
 import '@/app/tailwind.css';
 import '@/scss/globals.scss';
+import '@/app/globals.css';
 import Header from "./components/header";
 import Footer from "./components/footer";
 import ClientLayout from '@/app/components/ClientLayout';

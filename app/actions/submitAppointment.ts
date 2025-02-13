@@ -1,72 +1,56 @@
 'use server';
 
-import { createGoogleCalendarEvent } from '../services/googleCalendar';
-
-interface AppointmentResponse {
-    name: string;
-    email: string;
-    phone: string;
-    psychologistSlug: string;
-    id: string;
-    dateTime: Date;
-    meetLink?: string;
-    createdAt: Date;
-}
-
-export type FormState = {
-    success: boolean;
-    error?: string;
-    appointment?: AppointmentResponse;
-}
-
-export const initialState: FormState = {
-    success: false,
-    error: '',
-    appointment: undefined
-};
+import { prisma } from '@/app/lib/prisma';
+import { FormState, AppointmentResponse } from './types';
 
 export async function submitAppointment(
     formData: FormData
 ): Promise<FormState> {
-    if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
-        return { 
-            success: false, 
-            error: 'Ошибка конфигурации сервера не удалось получить данные из .env',
-            appointment: undefined
-        };
-    }
-
     try {
         const name = formData.get('name') as string;
         const email = formData.get('email') as string;
         const phone = formData.get('phone') as string;
-        const dateTime = new Date(formData.get('selectedDate') as string);
+        const selectedDateStr = formData.get('selectedDate') as string;
+        const selectedTime = formData.get('selectedTime') as string;
+        const psychologistSlug = formData.get('psychologistSlug') as string;
 
-        const event = await createGoogleCalendarEvent({
-            name,
-            email,
-            phone,
-            dateTime
-        });
+        if (!name || !email || !phone || !selectedDateStr || !selectedTime || !psychologistSlug) {
+            return {
+                success: false,
+                error: 'Все поля обязательны для заполнения',
+                appointment: undefined
+            };
+        }
 
-        return { 
-            success: true, 
-            appointment: {
+        // Combine date and time
+        const selectedDate = new Date(selectedDateStr);
+        const [hours, minutes] = selectedTime.split(':');
+        selectedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+
+        const savedAppointment = await prisma.appointment.create({
+            data: {
                 name,
                 email,
                 phone,
-                psychologistSlug: formData.get('psychologistSlug') as string,
-                id: event.id ?? '',
-                dateTime,
-                meetLink: event.hangoutLink ?? undefined,
+                dateTime: selectedDate,
+                psychologistSlug,
+            }
+        });
+
+        return {
+            success: true,
+            appointment: {
+                ...savedAppointment,
                 createdAt: new Date()
             }
         };
+
     } catch (error) {
-        console.error('Error:', error);
-        return { 
-            success: false, 
-            error: 'Ошибка при создании записи'
+        console.error('Error creating appointment:', error);
+        return {
+            success: false,
+            error: 'Произошла ошибка при создании записи. Пожалуйста, попробуйте позже.',
+            appointment: undefined
         };
     }
 }
