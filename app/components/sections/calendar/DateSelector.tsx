@@ -7,6 +7,8 @@ import { getInitialDate, getUpdatedDate, isAfter1630, getDaysInMonth } from '@/a
 import { CalendarProps } from '@/app/types/props/CalendarProps';
 import { DateState } from '@/app/types/props/DateState';
 
+const WEEKDAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+
 const DateSelector: React.FC<CalendarProps> = ({ onDateSelect }) => {
     const [dateState, setDateState] = useState<DateState>(() => {
     const initialDate = getInitialDate();
@@ -78,6 +80,13 @@ const DateSelector: React.FC<CalendarProps> = ({ onDateSelect }) => {
         onNextMonth={handleNextMonth}
         today={initialDate}
       />
+      <div className="grid grid-cols-7 gap-1 mb-2">
+        {WEEKDAYS.map((day) => (
+          <div key={day} className="text-center text-gray-500 text-sm py-2">
+            {day}
+          </div>
+        ))}
+      </div>
       <CalendarGrid
         daysInMonth={daysInMonth}
         month={month}

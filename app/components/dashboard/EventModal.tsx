@@ -3,6 +3,7 @@
 import React from 'react';
 import { AppointmentStatus, appointmentStatusLabels } from '@/app/types/enums/AppointmentStatus';
 import { useState } from 'react';
+import { Psychologist } from '@/app/types/props/Psychologist';
 
 interface EventModalProps {
     event: {
@@ -11,11 +12,11 @@ interface EventModalProps {
             email: string;
             phone: string;
             status: AppointmentStatus;
-            psychologistSlug: string;
+            psychologist: Psychologist;
         };
     } | null;
     onClose: () => void;
-    onStatusChange: (newStatus: AppointmentStatus) => Promise<void>;
+    onStatusChange: (status: AppointmentStatus) => void;
 }
 
 const EventModal: React.FC<EventModalProps> = ({ event, onClose, onStatusChange }) => {

@@ -30,6 +30,20 @@ export const getUpdatedDate = (month: number, year: number, offset: number) => {
     return { month: newMonth, year: newYear };
 };
 
-export const getDaysInMonth = (month: number, year: number): number => {
-    return new Date(year, month + 1, 0).getDate();
-};
+export function getDaysInMonth(month: number, year: number) {
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    
+    // Get the day of week for the first day (0 = Sunday, 1 = Monday, ..., 6 = Saturday)
+    let firstDayOfWeek = firstDay.getDay();
+    // Convert Sunday from 0 to 7 to match our Monday-first calendar
+    firstDayOfWeek = firstDayOfWeek === 0 ? 7 : firstDayOfWeek;
+    // Adjust to make Monday = 1
+    firstDayOfWeek--;
+
+    return {
+        totalDays: daysInMonth,
+        firstDayOfWeek: firstDayOfWeek
+    };
+}

@@ -1,7 +1,7 @@
 'use server';
 
 import { prisma } from '@/app/lib/prisma';
-import { FormState, AppointmentResponse } from './types';
+import { FormState } from './types';
 
 export async function submitAppointment(
     formData: FormData
@@ -13,7 +13,7 @@ export async function submitAppointment(
         const selectedDateStr = formData.get('selectedDate') as string;
         const selectedTime = formData.get('selectedTime') as string;
         const psychologistSlug = formData.get('psychologistSlug') as string;
-
+    
         if (!name || !email || !phone || !selectedDateStr || !selectedTime || !psychologistSlug) {
             return {
                 success: false,
@@ -22,17 +22,28 @@ export async function submitAppointment(
             };
         }
 
-        // Combine date and time
+        // Combine date and time in Warsaw timezone
         const selectedDate = new Date(selectedDateStr);
         const [hours, minutes] = selectedTime.split(':');
-        selectedDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-
+        
+        // Create date with explicit Warsaw timezone offset
+        const warsawDate = new Date(
+            selectedDate.getFullYear(),
+            selectedDate.getMonth(),
+            selectedDate.getDate(),
+            parseInt(hours),
+            parseInt(minutes),
+            0
+        );
+        
+        // Convert to UTC for database storage
+        const utcDate = new Date(warsawDate.toLocaleString('en-US', { timeZone: 'Europe/Warsaw' }));
         const savedAppointment = await prisma.appointment.create({
             data: {
                 name,
                 email,
                 phone,
-                dateTime: selectedDate,
+                dateTime: utcDate,
                 psychologistSlug,
             }
         });

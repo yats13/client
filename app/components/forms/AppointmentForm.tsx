@@ -6,6 +6,7 @@ import { submitAppointment } from '@/app/types/services/submitAppointmentService
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
 import { motion } from 'framer-motion';
+import { log } from 'console';
 
 interface AppointmentFormProps {
     selectedDate: Date;
@@ -36,9 +37,10 @@ const initialState: FormState = {
 
 const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selectedTime, psychologistSlug }) => {
     const boundSubmitAppointment = async (prevState: FormState, formData: FormData) => {
-        formData.append('selectedDate', selectedDate.toISOString());
+        formData.append('selectedDate', selectedDate.toLocaleString());
         formData.append('selectedTime', selectedTime);
         formData.append('psychologistSlug', psychologistSlug);
+
         return submitAppointment(formData);
     };
 

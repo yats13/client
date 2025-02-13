@@ -62,7 +62,7 @@ export function useAppointmentFormService() {
             const result = await submitAppointment(formDataToSend);
 
             if (result.success) {
-                setMessage('Запись успешно отправлена!');
+                setMessage('Запись 123 успешно отправлена!');
                 setIsSuccess(true);
             } else {
                 setMessage(result.error || 'Ошибка при отправке формы.');

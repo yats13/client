@@ -3,6 +3,17 @@ import React from 'react';
 import CalendarDay from '@/app/components/calendar/CalendarDay';
 import { CalendarGridProps } from '@/app/types/props/CalendarGridProps';
 
+interface CalendarGridProps {
+  daysInMonth: {
+    totalDays: number;
+    firstDayOfWeek: number;
+  };
+  month: number;
+  year: number;
+  today: Date;
+  selectedDay: number | null;
+  onDateSelect: (day: number) => void;
+}
 
 const CalendarGrid: React.FC<CalendarGridProps> = ({ daysInMonth, month, year, today, selectedDay, onDateSelect }) => {
     const isPastDate = (day: number): boolean => {
@@ -18,7 +29,13 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ daysInMonth, month, year, t
 
     return (
         <div className="grid grid-cols-7 gap-2">
-            {Array.from({ length: daysInMonth }, (_, i) => i + 1).map((day) => {
+            {/* Add empty cells for days before the first day of the month */}
+            {Array.from({ length: daysInMonth.firstDayOfWeek }, (_, i) => (
+                <div key={`empty-${i}`} className="h-10" />
+            ))}
+            
+            {/* Render the actual days */}
+            {Array.from({ length: daysInMonth.totalDays }, (_, i) => i + 1).map((day) => {
                 const isDisabled = isPastDate(day) || isTodayAndPastTimeLimit(day);
                 return (
                     <CalendarDay
@@ -26,7 +43,7 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ daysInMonth, month, year, t
                         day={day}
                         isSelected={selectedDay === day}
                         isDisabled={isDisabled}
-                        onDateSelect={() => onDateSelect(day)} // Ensure onDateSelect is used correctly
+                        onDateSelect={() => onDateSelect(day)}
                     />
                 );
             })}

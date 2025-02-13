@@ -35,3 +35,16 @@ body {
     text-wrap: balance;
   }
 }
+
+@keyframes expandWidth {
+  from {
+    max-width: 0;
+  }
+  to {
+    max-width: 40%;
+  }
+}
+
+.animate-expand {
+  animation: expandWidth 0.8s ease-out forwards;
+}

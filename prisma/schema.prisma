@@ -1,42 +1,58 @@
-generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "linux-musl"]
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-enum AppointmentStatus {
-  WAITING
-  PASSED
-  CANCELED
+generator client {
+  provider = "prisma-client-js"
 }
 
-model psychologist {
-  id          String @id @default(uuid())
-  slug        String @unique
-  name        String
-  image       String
-  title       String
-  description String
-  email       String @unique
-  phone       String
-  bg_color    String
-  visit_type  String
-  locale      String
+model User {
+  id           Int           @id @default(autoincrement())
+  email        String        @unique
+  phone        String
+  role         Role          @default(USER)
+  psychologist Psychologist?
+}
+
+model Psychologist {
+  id           Int           @id @default(autoincrement())
+  slug         String        @unique
+  name         String
+  image        String
+  title        String
+  description  String
+  bg_color     String
+  visit_type   String
+  locale       String
+  user         User          @relation(fields: [userId], references: [id])
+  userId       Int           @unique
+  appointments Appointment[]
 
   @@index([slug])
 }
 
-model appointment {
-  id                 String            @id @default(uuid())
-  name               String
-  email              String
-  phone              String
-  dateTime           DateTime
-  psychologistSlug   String
-  status             AppointmentStatus @default(WAITING)
-  createdAt          DateTime          @default(now())
+model Appointment {
+  id               BigInt            @id @default(autoincrement())
+  name             String
+  email            String
+  phone            String
+  dateTime         DateTime
+  psychologist     Psychologist      @relation(fields: [psychologistSlug], references: [slug])
+  psychologistSlug String
+  status           AppointmentStatus @default(WAITING)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+}
+
+enum AppointmentStatus {
+  WAITING
+  IN_PROGRESS
+  PASSED
+  CANCELED
+}
+
+enum Role {
+  USER
+  ADMIN
 }

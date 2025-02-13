@@ -15,7 +15,6 @@ const Calendar: React.FC<SpecialistSelectorProps> = ({ psychologists }) => {
     const [selectedDate, setSelectedDate] = useState<Date | null>(null);
     const [selectedTime, setSelectedTime] = useState<string | null>(null);
     const [selectedSpecialist, setSelectedSpecialist] = useState<PsychologistProps | null>(null);
-
     const handleSubmit = () => {
         handleBookingSubmit(selectedDate, selectedTime, selectedSpecialist);
     };
