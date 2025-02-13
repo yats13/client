@@ -49,12 +49,12 @@ const TimePicker: React.FC<TimePickerProps> = ({ selectedDate, onTimeSelect }) =
                     key={time}
                     disabled={disabled}
                     onClick={() => handleTimeClick(time)}
-                    className={`px-3 py-1 rounded-full border ${
+                    className={`px-3 py-1 rounded-full border transition-colors ${
                         disabled
-                            ? 'cursor-not-allowed text-gray-300'
+                            ? 'cursor-not-allowed text-gray-300 border-gray-200'
                             : isSelected
-                                ? 'bg-mint border-mint text-zinc-900'
-                                : 'hover:bg-mint/35 hover:text-zinc-900'
+                                ? 'bg-purple border-purple text-white'
+                                : 'border-gray-200 hover:bg-mint/35 hover:text-purple hover:border-mint'
                     }`}
                 >
                     {time}
@@ -63,8 +63,8 @@ const TimePicker: React.FC<TimePickerProps> = ({ selectedDate, onTimeSelect }) =
         });
 
     return (
-        <div className="time-picker border border-gray-300 rounded-3xl p-6 m-2">
-            <h3 className="text-center font-semibold text-gray-700 mb-4">Выберите время</h3>
+        <div className="time-picker border border-gray-200 rounded-3xl p-6 m-2 shadow-sm">
+            <h3 className="text-center font-semibold text-purple mb-4">Выберите время</h3>
             <div className="grid grid-cols-2 gap-3">{renderTimeButtons()}</div>
         </div>
     );

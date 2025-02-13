@@ -7,18 +7,18 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ month, year, onPrevious
         <div className="flex justify-between items-center mb-4">
             <button 
                 onClick={onPreviousMonth} 
-                className="text-gray-500"
+                className="text-purple hover:text-mint transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-purple/10"
                 disabled={year === today.getFullYear() && month <= today.getMonth()}
                 aria-label="Previous Month"
             >
                 &lt;
             </button>
-            <span className="font-semibold">
+            <span className="font-semibold text-purple">
                 {getMonthName(month, 'ru')} {year}
             </span>
             <button 
                 onClick={onNextMonth} 
-                className="text-gray-500"
+                className="text-purple hover:text-mint transition-colors w-8 h-8 flex items-center justify-center rounded-full hover:bg-purple/10"
                 aria-label="Next Month"
             >
                 &gt;

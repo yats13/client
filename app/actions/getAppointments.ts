@@ -3,9 +3,12 @@
 import { prisma } from '@/app/lib/prisma';
 import { AppointmentStatus } from '@/app/types/enums/AppointmentStatus';
 
-export async function getAppointments() {
+export async function getAppointments(psychologistSlug?: string | null) {
     try {
         const appointments = await prisma.appointment.findMany({
+            where: psychologistSlug ? {
+                psychologistSlug
+            } : undefined,
             orderBy: {
                 dateTime: 'asc'
             }
@@ -30,7 +33,8 @@ export async function getAppointments() {
                 extendedProps: {
                     email: appointment.email,
                     phone: appointment.phone,
-                    status: appointment.status
+                    status: appointment.status,
+                    psychologistSlug: appointment.psychologistSlug
                 }
             }))
         };

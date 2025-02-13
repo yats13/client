@@ -8,6 +8,10 @@ import interactionPlugin from '@fullcalendar/interaction';
 import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
 import PageTitle from '../components/page-titile';
 import { getAppointments } from '../actions/getAppointments';
+import { updateAppointmentStatus } from '../actions/updateAppointmentStatus';
+import PsychologistSelector from '../components/dashboard/PsychologistSelector';
+import EventModal from '../components/dashboard/EventModal';
+import { AppointmentStatus } from '../types/enums/AppointmentStatus';
 
 interface CalendarEvent {
   id: string;
@@ -17,111 +21,127 @@ interface CalendarEvent {
   extendedProps?: {
     email: string;
     phone: string;
-    status: string;
+    status: AppointmentStatus;
+    psychologistSlug: string;
   };
 }
 
 export default function DashboardPage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [selectedPsychologist, setSelectedPsychologist] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const result = await getAppointments();
-        if (result.success && result.appointments) {
-          setEvents(result.appointments);
-        } else {
-          setError(result.error || 'Failed to fetch appointments');
-        }
-      } catch (err) {
-        setError('An error occurred while fetching appointments');
-        console.error(err);
-      } finally {
-        setIsLoading(false);
+  const fetchAppointments = async (psychologistSlug?: string | null) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      const result = await getAppointments(psychologistSlug);
+      if (result.success && result.appointments) {
+        setEvents(result.appointments);
+      } else {
+        setError(result.error || 'Failed to fetch appointments');
       }
-    };
-
-    fetchAppointments();
-  }, []);
-
-  const handleEventClick = (clickInfo: EventClickArg) => {
-    const event = events.find(e => e.id === clickInfo.event.id);
-    setSelectedEvent(event || null);
+    } catch (err) {
+      setError('An error occurred while fetching appointments');
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  if (error) {
-    return (
-      <div className="p-4">
-        <PageTitle>Панель управления</PageTitle>
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-          <strong className="font-bold">Ошибка! </strong>
-          <span className="block sm:inline">{error}</span>
-        </div>
-      </div>
-    );
-  }
+  useEffect(() => {
+    fetchAppointments(selectedPsychologist);
+  }, [selectedPsychologist]);
+
+  const handleEventClick = (clickInfo: EventClickArg) => {
+    setSelectedEvent(clickInfo.event.toPlainObject() as CalendarEvent);
+  };
+
+  const handleStatusChange = async (newStatus: AppointmentStatus) => {
+    if (!selectedEvent) return;
+
+    const result = await updateAppointmentStatus(selectedEvent.id, newStatus);
+    if (result.success) {
+      // Update the local state to reflect the change
+      setEvents(prevEvents => 
+        prevEvents.map(event => 
+          event.id === selectedEvent.id
+            ? {
+                ...event,
+                extendedProps: {
+                  ...event.extendedProps!,
+                  status: newStatus
+                }
+              }
+            : event
+        )
+      );
+      // Update the selected event
+      setSelectedEvent(prev => 
+        prev ? {
+          ...prev,
+          extendedProps: {
+            ...prev.extendedProps!,
+            status: newStatus
+          }
+        } : null
+      );
+    } else {
+      setError('Failed to update appointment status');
+    }
+  };
 
   return (
-    <div className="p-4">
-      <PageTitle>Панель управления</PageTitle>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3">
-          <div className="bg-white rounded-lg shadow p-4">
-            {isLoading ? (
-              <div className="h-96 flex items-center justify-center">
-                <div className="text-gray-500">Загрузка записей...</div>
-              </div>
-            ) : (
-              <FullCalendar
-                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-                initialView="timeGridWeek"
-                headerToolbar={{
-                  left: 'prev,next today',
-                  center: 'title',
-                  right: 'dayGridMonth,timeGridWeek,timeGridDay'
-                }}
-                events={events}
-                eventClick={handleEventClick}
-                slotMinTime="09:00:00"
-                slotMaxTime="20:00:00"
-                allDaySlot={false}
-                locale="ru"
-                height="auto"
-                expandRows={true}
-                slotDuration="01:00:00"
-                eventTimeFormat={{
-                  hour: '2-digit',
-                  minute: '2-digit',
-                  hour12: false
-                }}
-              />
-            )}
-          </div>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="bg-white rounded-lg shadow p-4">
-            <h2 className="text-lg font-semibold mb-4">Детали записи</h2>
-            {selectedEvent ? (
-              <div className="space-y-3">
-                <p><span className="font-medium">Клиент:</span> {selectedEvent.title}</p>
-                <p><span className="font-medium">Email:</span> {selectedEvent.extendedProps?.email}</p>
-                <p><span className="font-medium">Телефон:</span> {selectedEvent.extendedProps?.phone}</p>
-                <p><span className="font-medium">Статус:</span> {selectedEvent.extendedProps?.status}</p>
-                <p><span className="font-medium">Дата:</span> {new Date(selectedEvent.start).toLocaleString('ru-RU')}</p>
-              </div>
-            ) : (
-              <p className="text-gray-500">Выберите запись для просмотра деталей</p>
-            )}
-          </div>
-        </div>
+    <div className="container mx-auto py-8">
+      <div className="flex justify-between items-center mb-8">
+        <PageTitle text="Ежедневник"/>
+        <PsychologistSelector
+          onSelect={setSelectedPsychologist}
+          selectedSlug={selectedPsychologist}
+        />
       </div>
+
+      {error && (
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+          {error}
+        </div>
+      )}
+
+      <div className={isLoading ? 'opacity-50' : ''}>
+        <FullCalendar
+          plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
+          headerToolbar={{
+            left: 'prev,next today',
+            center: 'title',
+            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+          }}
+          initialView="timeGridWeek"
+          editable={false}
+          selectable={true}
+          selectMirror={true}
+          dayMaxEvents={true}
+          weekends={true}
+          events={events}
+          eventClick={handleEventClick}
+          eventTimeFormat={{
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+          }}
+          slotMinTime="09:00:00"
+          slotMaxTime="20:00:00"
+          allDaySlot={false}
+          locale="ru"
+        />
+      </div>
+
+      <EventModal
+        event={selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onStatusChange={handleStatusChange}
+      />
     </div>
   );
 }
