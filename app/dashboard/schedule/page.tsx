@@ -17,6 +17,7 @@ import type { CalendarEvent } from '@/app/types/appointment';
 import { BUSINESS_HOURS } from '@/app/constants/time';
 import { ERRORS } from '@/app/constants/errors';
 import type { ApiResponse } from '@/app/types/api';
+import { addDays } from '@/app/utils/date';
 
 export default function DashboardSchedulePage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
@@ -135,6 +136,10 @@ export default function DashboardSchedulePage() {
           slotMaxTime={BUSINESS_HOURS.end}
           allDaySlot={false}
           locale="ru"
+          validRange={{
+            start: addDays(new Date(), 1).toISOString(),
+          }}
+          selectConstraint="validRange"
         />
       </div>
 
