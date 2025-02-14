@@ -1,5 +1,5 @@
 import React from 'react';
-import prisma from '@/prisma/db';
+import { prisma } from '@/prisma/db';
 import PsychologistsCard from './PsychologistCard';
 
 export default async function Psychologists() {

@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from '@/prisma/db';
 import type { AppointmentStatus } from '@/app/types/enums/AppointmentStatus';
 
 type UpdateResponse = {

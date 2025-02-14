@@ -2,8 +2,8 @@ import PageTitle from "@/app/components/page-titile";
 
 import Calendar from "@/app/components/sections/calendar/Calendar";
 import React from "react";
-import prisma from "@/prisma/db";
 import { ERRORS } from "@/app/constants/errors";
+import { getPsychologist } from "@/app/actions/getPsychologist";
 
 export const metadata = {
     title: "Запись на консультацию | Психолог Онлайн",
@@ -26,31 +26,13 @@ export const metadata = {
     }
 };
 export default async function Page() {
-    try {
-        const psychologistsData = await prisma.psychologist.findMany({
-            include: {
-                user: {
-                    select: {
-                        email: true,
-                        phone: true,
-                    }
-                }
-            }
-        });
-        
-        return (
-                <main className="relative">
-                    <PageTitle text="Календарь"/>
-                    <Calendar psychologists={psychologistsData}/>
-                </main>
-        );
-    } catch (error) {
-        console.error("Error fetching psychologists:", error);
+    const psychologists = await getPsychologist();
         return (
             <main className="relative">
-                <PageTitle text="Календарь" />
-                <p className="text-red-500 text-center">{ERRORS.GENERIC.LOADING}</p>
+                <PageTitle text="Календарь"/>
+                {psychologists && <Calendar psychologists={psychologists}/>}
+                {!psychologists && <p className="text-red-500 text-center">{ERRORS.GENERIC.LOADING}</p>}
             </main>
         );
-    }
+
 }

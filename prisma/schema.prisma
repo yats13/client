@@ -46,6 +46,7 @@ model Appointment {
   updatedAt      DateTime         @updatedAt
 
   @@index([psychologistId])
+  @@index([dateTime])
 }
 
 enum AppointmentStatus {

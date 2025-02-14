@@ -1,7 +1,7 @@
 'use server';
 
 import { hashPassword } from './password';
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from '@/prisma/db';
 
 export async function createUser(email: string, phone: string, password: string) {
   try {

@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import CalendarHeader from '@/app/components/calendar/CalendarHeader';
 import CalendarGrid from '@/app/components/calendar/CalendarGrid';
-import { getInitialDate, getUpdatedDate, isAfter1630, getDaysInMonth } from '@/app/types/services/calendar-service';
+import { getInitialDate, getUpdatedDate, getDaysInMonth } from '@/app/types/services/calendar-service';
 import { CalendarProps } from '@/app/types/props/CalendarProps';
 import { DateState } from '@/app/types/props/DateState';
 
@@ -33,18 +33,11 @@ const DateSelector: React.FC<CalendarProps> = ({ onDateSelect }) => {
     (day: number) => {
       const selectedDate = new Date(year, month, day);
       selectedDate.setHours(0, 0, 0, 0);
-
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-      const isToday = selectedDate.getTime() === now.getTime();
-
-      if (!isToday || !isAfter1630()) {
-        setDateState((prevState) => ({
-          ...prevState,
-          selectedDay: day,
-        }));
-        onDateSelect(selectedDate);
-      }
+      setDateState((prevState) => ({
+        ...prevState,
+        selectedDay: day,
+      }));
+      onDateSelect(selectedDate);
     },
     [month, year, onDateSelect]
   );

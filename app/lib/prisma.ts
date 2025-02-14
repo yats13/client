@@ -1,18 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 
-const prismaClientSingleton = new PrismaClient({
-    datasourceUrl: process.env.DATABASE_URL,
-});
-
-// Ensure connection is reused
-const globalForPrisma = globalThis as unknown as {
-    prisma: PrismaClient | undefined
-};
-
-if (!globalForPrisma.prisma) {
-    globalForPrisma.prisma = prismaClientSingleton;
+declare global {
+  var prisma: PrismaClient | undefined;
 }
 
-export const prisma = globalForPrisma.prisma;
+const prisma = global.prisma || new PrismaClient({
+  log: ['query'],
+});
 
-if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prismaClientSingleton;
+if (process.env.NODE_ENV !== 'production') {
+  global.prisma = prisma;
+}
+
+export { prisma };

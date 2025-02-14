@@ -1,18 +1,26 @@
 'use client';
 
-export const isAfter1630 = () => {
-    const currentHour = new Date().getHours();
-    const currentMinutes = new Date().getMinutes();
-    return currentHour > 16 || (currentHour === 16 && currentMinutes >= 30);
-};
+import { addDays } from '@/app/utils/date';
+
+export function isDateDisabled(date: Date): boolean {
+  const tomorrow = addDays(new Date(), 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  
+  const checkDate = new Date(date);
+  checkDate.setHours(0, 0, 0, 0);
+
+  // Disable if date is before tomorrow
+  return checkDate < tomorrow;
+}
+
+export function getValidDate(date: Date): Date {
+  return addDays(date, 1);
+}
 
 export const getInitialDate = (): Date => {
-    const now = new Date();
-    now.setHours(0, 0, 0, 0);
-    if (isAfter1630()) {
-        return new Date(now.setDate(now.getDate() + 1)); // Select next day if after 16:30
-    }
-    return now;
+  const tomorrow = addDays(new Date(), 1);
+  tomorrow.setHours(0, 0, 0, 0);
+  return tomorrow;
 };
 
 export const getUpdatedDate = (month: number, year: number, offset: number) => {

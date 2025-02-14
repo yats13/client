@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from '@/prisma/db';
 import type { CalendarEvent } from '@/app/types/appointment';
 import { APPOINTMENT_DURATION } from '@/app/constants/time';
 import { ERRORS } from '@/app/constants/errors';

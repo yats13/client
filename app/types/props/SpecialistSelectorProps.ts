@@ -1,5 +1,5 @@
-import { PsychologistProps } from '@/app/types/props/PsychologistProps';
+import type { Psychologist } from '@prisma/client';
 
 export type  SpecialistSelectorProps = {
-    psychologists: PsychologistProps[];
+    psychologists: Psychologist[];
 }

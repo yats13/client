@@ -16,7 +16,6 @@ import DashboardMenu from '@/app/components/dashboard/DashboardMenu';
 import type { CalendarEvent } from '@/app/types/appointment';
 import { BUSINESS_HOURS } from '@/app/constants/time';
 import { ERRORS } from '@/app/constants/errors';
-import type { ApiResponse } from '@/app/types/api';
 import { addDays } from '@/app/utils/date';
 import { getBusinessHours, getBlockedTimes } from '@/app/utils/calendar';
 
@@ -31,16 +30,15 @@ export default function DashboardSchedulePage() {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await getAppointments(selectedPsychologist);
+      const result = await getAppointments(selectedPsychologist ?? 0);
       
-      if (!result.success) {
-        throw new Error(result.error || ERRORS.FETCH.APPOINTMENTS);
+      if (result.error) {
+        throw new Error(ERRORS.FETCH.APPOINTMENTS);
       }
       
-      setEvents(result.appointments ?? []);
+      setEvents(result.data);
     } catch (err) {
       setError(err instanceof Error ? err.message : ERRORS.GENERIC.LOADING);
-      console.error('Error loading appointments:', err);
     } finally {
       setIsLoading(false);
     }

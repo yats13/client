@@ -1,6 +1,6 @@
 'use server';
 
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from '@/prisma/db';
 import type { FormState } from '@/app/types/appointment';
 import { ERRORS } from '@/app/constants/errors';
 

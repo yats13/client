@@ -22,12 +22,11 @@ export default function TimeSelector({
     const slots: { time: string; isDisabled: boolean }[] = [];
     const [startHour] = BUSINESS_HOURS.start.split(':').map(Number);
     const [endHour] = BUSINESS_HOURS.end.split(':').map(Number);
-console.log(appointments);
+
     // Get booked times for selected date and psychologist
     const bookedTimes = (appointments || [])
       .filter(apt => {
         const aptDate = new Date(apt.start);
-        const selectedDateTime = new Date(selectedDate);
         const isMatch = (
           apt.extendedProps.psychologistId === Number(psychologistId) &&
           aptDate.getFullYear() === selectedDate.getFullYear() &&
@@ -35,7 +34,6 @@ console.log(appointments);
           aptDate.getDate() === selectedDate.getDate() &&
           apt.extendedProps.status !== AppointmentStatus.CANCELED
         );
-        
         return isMatch;
       })
       .map(apt => {
@@ -43,7 +41,7 @@ console.log(appointments);
         return date.getHours();
       });
 
-    // Generate time slots
+      // Generate time slots
     for (let hour = startHour; hour < endHour; hour++) {
       const timeString = `${hour.toString().padStart(2, '0')}:00`;
       slots.push({

@@ -9,7 +9,6 @@ import type { CalendarEvent } from '@/app/types/appointment';
 import type { SpecialistSelectorProps } from '@/app/types/props/SpecialistSelectorProps';
 import type { PsychologistProps } from '@/app/types/props/PsychologistProps';
 import { getAppointments } from '@/app/actions/getAppointments';
-
 const DateSelector = dynamic(() => import('@/app/components/sections/calendar/DateSelector'), { ssr: false });
 const TimePicker = dynamic(() => import('@/app/components/sections/calendar/TimePicker'), { ssr: false });
 
@@ -19,21 +18,45 @@ const Calendar: React.FC<SpecialistSelectorProps> = ({ psychologists }) => {
     const [selectedSpecialist, setSelectedSpecialist] = useState<PsychologistProps | null>(null);
     const [appointments, setAppointments] = useState<CalendarEvent[]>([]);
 
-    useEffect(() => {
-        if (selectedSpecialist) {
-            const fetchAppointments = async () => {
-                const result = await getAppointments(selectedSpecialist.id);
-                if (result.success && result.appointments) {
-                    setAppointments(result.appointments);
-                }
-            };
-            fetchAppointments();
+    const handleDateSelect = (date: Date | null) => {
+        setSelectedDate(date);
+        if (date === null) {
+            setSelectedTime(null);
         }
-    }, [selectedSpecialist]);
+    };
+
+    // Reset time when date or specialist changes
+    useEffect(() => {
+        setSelectedTime(null);
+    }, [selectedDate, selectedSpecialist]);
+
+    // Fetch appointments when both date and specialist are selected
+    useEffect(() => {
+        if (!selectedSpecialist || !selectedDate) {
+            return;
+        }
+        const date = new Date(selectedDate ?? new Date());
+        // Create new Date objects to avoid mutation
+        const start = new Date(date);
+        const end = new Date(date);
+        
+        const startTime = start.setHours(9, 0, 0, 0);
+        const endTime = end.setHours(17, 0, 0, 0);
+
+        getAppointments(selectedSpecialist?.id ?? 0)
+            .then(response => {
+                setAppointments(response.data);
+            })
+            .catch(error => {
+                console.error('Error fetching appointments:', error);
+                setAppointments([]);
+            });
+
+    }, [selectedSpecialist, selectedDate]);
 
     const handleSubmit = () => {
         handleBookingSubmit(selectedDate, selectedTime, selectedSpecialist);
-    };
+    }
 
     return (
         <>
@@ -44,7 +67,7 @@ const Calendar: React.FC<SpecialistSelectorProps> = ({ psychologists }) => {
                             Выберите дату и время
                         </h3>
                         <div className="flex flex-col lg:flex-row">
-                            <DateSelector onDateSelect={setSelectedDate} />
+                            <DateSelector onDateSelect={handleDateSelect} />
                             {selectedDate && (
                                 <TimePicker 
                                     selectedDate={selectedDate} 

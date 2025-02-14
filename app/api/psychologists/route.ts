@@ -1,4 +1,4 @@
-import { prisma } from '@/app/lib/prisma';
+import { prisma } from '@/prisma/db';
 import { NextResponse } from 'next/server';
 import type { Psychologist } from '@/app/types/appointment';
 import type { ApiResponse } from '@/app/types/api';
