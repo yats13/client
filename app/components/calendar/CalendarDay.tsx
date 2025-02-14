@@ -1,13 +1,7 @@
 import React from 'react';
+import type { CalendarDayProps } from '@/app/types/props/calendar';
 
-interface CalendarDayProps {
-    day: number;
-    isSelected: boolean;
-    isDisabled: boolean;
-    onDateSelect: () => void;
-}
-
-const CalendarDay: React.FC<CalendarDayProps> = ({ day, isSelected, isDisabled, onDateSelect }) => {
+export default function CalendarDay({ day, isSelected, isDisabled, onDateSelect }: CalendarDayProps) {
     return (
         <button
             className={`w-8 h-8 rounded-full transition-colors ${
@@ -24,6 +18,4 @@ const CalendarDay: React.FC<CalendarDayProps> = ({ day, isSelected, isDisabled, 
             {day}
         </button>
     );
-};
-
-export default CalendarDay;
+}

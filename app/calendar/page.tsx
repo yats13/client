@@ -3,7 +3,7 @@ import PageTitle from "@/app/components/page-titile";
 import Calendar from "@/app/components/sections/calendar/Calendar";
 import React from "react";
 import prisma from "@/prisma/db";
-import { log } from "console";
+import { ERRORS } from "@/app/constants/errors";
 
 export const metadata = {
     title: "Запись на консультацию | Психолог Онлайн",
@@ -27,8 +27,17 @@ export const metadata = {
 };
 export default async function Page() {
     try {
-        const psychologistsData = await prisma.psychologist.findMany();
-        console.log(psychologistsData);
+        const psychologistsData = await prisma.psychologist.findMany({
+            include: {
+                user: {
+                    select: {
+                        email: true,
+                        phone: true,
+                    }
+                }
+            }
+        });
+        
         return (
                 <main className="relative">
                     <PageTitle text="Календарь"/>
@@ -40,7 +49,7 @@ export default async function Page() {
         return (
             <main className="relative">
                 <PageTitle text="Календарь" />
-                <p className="text-red-500 text-center">Ошибка загрузки данных</p>
+                <p className="text-red-500 text-center">{ERRORS.GENERIC.LOADING}</p>
             </main>
         );
     }

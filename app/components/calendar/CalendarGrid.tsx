@@ -1,21 +1,9 @@
 // CalendarGrid.tsx
 import React from 'react';
 import CalendarDay from '@/app/components/calendar/CalendarDay';
-import { CalendarGridProps } from '@/app/types/props/CalendarGridProps';
+import type { CalendarGridProps } from '@/app/types/props/calendar';
 
-interface CalendarGridProps {
-  daysInMonth: {
-    totalDays: number;
-    firstDayOfWeek: number;
-  };
-  month: number;
-  year: number;
-  today: Date;
-  selectedDay: number | null;
-  onDateSelect: (day: number) => void;
-}
-
-const CalendarGrid: React.FC<CalendarGridProps> = ({ daysInMonth, month, year, today, selectedDay, onDateSelect }) => {
+export default function CalendarGrid({ daysInMonth, month, year, today, selectedDay, onDateSelect }: CalendarGridProps) {
     const isPastDate = (day: number): boolean => {
         const date = new Date(year, month, day);
         date.setHours(0, 0, 0, 0);
@@ -49,6 +37,4 @@ const CalendarGrid: React.FC<CalendarGridProps> = ({ daysInMonth, month, year, t
             })}
         </div>
     );
-};
-
-export default CalendarGrid;
+}

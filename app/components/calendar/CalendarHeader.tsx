@@ -1,8 +1,8 @@
 import React from 'react';
-import { CalendarHeaderProps } from '@/app/types/props/CalendarHeaderProps';
-import { Months, getMonthName } from '@/app/types/enums/Months';
+import type { CalendarHeaderProps } from '@/app/types/props/calendar';
+import { getMonthName } from '@/app/types/enums/Months';
 
-const CalendarHeader: React.FC<CalendarHeaderProps> = ({ month, year, onPreviousMonth, onNextMonth, today }) => {
+export default function CalendarHeader({ month, year, onPreviousMonth, onNextMonth, today }: CalendarHeaderProps) {
     return (
         <div className="flex justify-between items-center mb-4">
             <button 
@@ -25,6 +25,4 @@ const CalendarHeader: React.FC<CalendarHeaderProps> = ({ month, year, onPrevious
             </button>
         </div>
     );
-};
-
-export default CalendarHeader;
+}
