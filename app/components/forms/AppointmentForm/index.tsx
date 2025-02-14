@@ -27,7 +27,7 @@ const initialState: FormState = {
 const inputClassName = 'w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500';
 
 export default function AppointmentForm({ selectedDate, selectedTime, psychologistSlug }: AppointmentFormProps) {
-  const boundSubmitAppointment: FormAction<FormState> = async (prevState, formData) => {
+  const boundSubmitAppointment: FormAction = async (prevState: FormState, formData: FormData) => {
     const agree = formData.get('agree');
     if (!agree) {
       return {

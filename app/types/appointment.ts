@@ -1,5 +1,5 @@
 import type { AppointmentStatus } from './enums/AppointmentStatus';
-import type { Psychologist } from '@prisma/client';
+import type { Psychologist as PrismaPhysician } from '@prisma/client';
 
 export type Psychologist = {
   id: number;
@@ -8,7 +8,7 @@ export type Psychologist = {
 }
 
 export type CalendarEvent = {
-  id: number;
+  id: string;
   title: string;
   start: string;
   end: string;

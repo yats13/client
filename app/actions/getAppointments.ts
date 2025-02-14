@@ -39,7 +39,7 @@ export async function getAppointments(psychologistId?: number | null): Promise<A
     return {
       success: true,
       appointments: appointments.map((appointment) => ({
-        id: Number(appointment.id),
+        id: String(appointment.id),
         title: appointment.name,
         start: appointment.dateTime.toISOString(),
         end: new Date(appointment.dateTime.getTime() + APPOINTMENT_DURATION).toISOString(),

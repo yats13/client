@@ -68,7 +68,7 @@ export default function DashboardSchedulePage() {
     if (!selectedEvent) return;
 
     try {
-      const result = await updateAppointmentStatus(selectedEvent.id, newStatus);
+      const result = await updateAppointmentStatus(Number(selectedEvent.id), newStatus);
       if (!result.success) {
         throw new Error(ERRORS.UPDATE.STATUS);
       }

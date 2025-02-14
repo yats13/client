@@ -1,4 +1,4 @@
-export type FormAction<TState> = (prevState: TState, formData: FormData) => Promise<TState>;
+export type FormAction = (prevState: FormState, formData: FormData) => Promise<FormState>;
 
 export type FormSubmitHandler = (formData: FormData) => void;
 
