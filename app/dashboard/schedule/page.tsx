@@ -36,7 +36,7 @@ export default function DashboardSchedulePage() {
         throw new Error(ERRORS.FETCH.APPOINTMENTS);
       }
       
-      setEvents(result.data);
+      setEvents(result.appointments ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : ERRORS.GENERIC.LOADING);
     } finally {

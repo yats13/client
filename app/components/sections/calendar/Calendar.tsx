@@ -45,7 +45,7 @@ const Calendar: React.FC<SpecialistSelectorProps> = ({ psychologists }) => {
 
         getAppointments(selectedSpecialist?.id ?? 0)
             .then(response => {
-                setAppointments(response.data);
+                setAppointments(response.appointments ?? []);
             })
             .catch(error => {
                 console.error('Error fetching appointments:', error);
