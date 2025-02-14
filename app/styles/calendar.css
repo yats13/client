@@ -1,0 +1,8 @@
+.blocked-time {
+  pointer-events: none;
+  cursor: not-allowed;
+}
+
+.canceled-time {
+  opacity: 0.5;
+} 
