@@ -1,7 +1,9 @@
 import PageTitle from "@/app/components/page-titile";
-import prisma from '@/prisma/db';
+
 import Calendar from "@/app/components/sections/calendar/Calendar";
 import React from "react";
+import prisma from "@/prisma/db";
+import { log } from "console";
 
 export const metadata = {
     title: "Запись на консультацию | Психолог Онлайн",
@@ -26,7 +28,7 @@ export const metadata = {
 export default async function Page() {
     try {
         const psychologistsData = await prisma.psychologist.findMany();
-
+        console.log(psychologistsData);
         return (
                 <main className="relative">
                     <PageTitle text="Календарь"/>

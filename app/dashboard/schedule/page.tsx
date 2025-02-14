@@ -1,159 +1,110 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 import interactionPlugin from '@fullcalendar/interaction';
-import { DateSelectArg, EventClickArg } from '@fullcalendar/core';
+import type { EventClickArg } from '@fullcalendar/core';
 import PageTitle from '@/app/components/page-titile';
 import { getAppointments } from '@/app/actions/getAppointments';
 import { updateAppointmentStatus } from '@/app/actions/updateAppointmentStatus';
 import PsychologistSelector from '@/app/components/dashboard/PsychologistSelector';
 import EventModal from '@/app/components/dashboard/EventModal';
 import { AppointmentStatus } from '@/app/types/enums/AppointmentStatus';
-import DashboardMenu from "@/app/components/dashboard/DashboardMenu";
-
-interface Psychologist {
-  slug: string;
-  name: string;
-  email?: string;
-  phone?: string;
-  specialization?: string;
-  imageUrl?: string;
-  // Add any other required psychologist properties
-}
-
-interface CalendarEvent {
-  id: string;
-  title: string;
-  start: string;
-  end: string;
-  extendedProps?: {
-    email: string;
-    phone: string;
-    status: AppointmentStatus;
-    psychologistSlug: string;  // Keep the original property
-    psychologistData: Psychologist;  // Add full psychologist data
-    psychologist?: Psychologist;  // For backwards compatibility
-  };
-}
+import DashboardMenu from '@/app/components/dashboard/DashboardMenu';
+import type { CalendarEvent } from '@/app/types/appointment';
+import { BUSINESS_HOURS } from '@/app/constants/time';
+import { ERRORS } from '@/app/constants/errors';
+import type { ApiResponse } from '@/app/types/api';
 
 export default function DashboardSchedulePage() {
   const [events, setEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [selectedPsychologist, setSelectedPsychologist] = useState<string | null>(null);
+  const [selectedPsychologist, setSelectedPsychologist] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchAppointments = async (psychologistId?: string | null) => {
+  const loadAppointments = useCallback(async () => {
     try {
       setIsLoading(true);
       setError(null);
-      const result = await getAppointments(psychologistId);
-      if (result.success && result.appointments) {
-        // Transform the data to match CalendarEvent interface
-        const transformedEvents = result.appointments.map(apt => ({
-          ...apt,
-          extendedProps: {
-            ...apt.extendedProps,
-            // Ensure we maintain the original psychologistSlug
-            psychologistSlug: apt.extendedProps.psychologistSlug,
-            // Create the psychologist object with all available data
-            psychologist: {
-              slug: apt.extendedProps.psychologistSlug,
-              name: apt.title.split(' - ')[0],
-              email: apt.extendedProps.psychologistData?.email,
-              phone: apt.extendedProps.psychologistData?.phone,
-              specialization: apt.extendedProps.psychologistData?.specialization,
-              imageUrl: apt.extendedProps.psychologistData?.imageUrl,
-              // Include any other psychologist properties from psychologistData
-              ...apt.extendedProps.psychologistData
-            }
-          }
-        }));
-        setEvents(transformedEvents);
-      } else {
-        setError(result.error || 'Failed to fetch appointments');
+      const result = await getAppointments(selectedPsychologist);
+      
+      if (!result.success) {
+        throw new Error(result.error || ERRORS.FETCH.APPOINTMENTS);
       }
+      
+      setEvents(result.appointments ?? []);
     } catch (err) {
-      setError('An error occurred while fetching appointments');
-      console.error(err);
+      setError(err instanceof Error ? err.message : ERRORS.GENERIC.LOADING);
+      console.error('Error loading appointments:', err);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  useEffect(() => {
-    fetchAppointments(selectedPsychologist);
   }, [selectedPsychologist]);
 
-  const handleEventClick = (clickInfo: EventClickArg) => {
+  useEffect(() => {
+    void loadAppointments();
+  }, [loadAppointments]);
+
+  const handleEventClick = useCallback((clickInfo: EventClickArg) => {
     const event = clickInfo.event;
-    // Create a new date object in local timezone
     const localStart = new Date(event.start!.getTime() - event.start!.getTimezoneOffset() * 60000);
     const localEnd = new Date(event.end!.getTime() - event.end!.getTimezoneOffset() * 60000);
     
     setSelectedEvent({
       ...event.toPlainObject(),
       start: localStart.toISOString(),
-      end: localEnd.toISOString()
+      end: localEnd.toISOString(),
+      extendedProps: {
+        ...event.extendedProps,
+        psychologist: event.extendedProps.psychologist,
+      },
     } as CalendarEvent);
-  };
+  }, []);
 
-  const handleStatusChange = async (newStatus: AppointmentStatus) => {
+  const handleStatusChange = useCallback(async (newStatus: AppointmentStatus) => {
     if (!selectedEvent) return;
 
-    const result = await updateAppointmentStatus(selectedEvent.id, newStatus);
-    if (result.success) {
-      // Update the local state to reflect the change
-      setEvents(prevEvents => 
-        prevEvents.map(event => 
-          event.id === selectedEvent.id
-            ? {
-                ...event,
-                extendedProps: {
-                  ...event.extendedProps!,
-                  status: newStatus
-                }
-              }
-            : event
-        )
-      );
-      // Update the selected event
-      setSelectedEvent(prev => 
-        prev ? {
-          ...prev,
-          extendedProps: {
-            ...prev.extendedProps!,
-            status: newStatus
-          }
-        } : null
-      );
-    } else {
-      setError('Failed to update appointment status');
-    }
-  };
+    try {
+      const result = await updateAppointmentStatus(selectedEvent.id, newStatus);
+      if (!result.success) {
+        throw new Error(ERRORS.UPDATE.STATUS);
+      }
 
-  const formatUTCDate = (date: Date) => {
-    return date.toISOString().split('T')[0];
-  };
+      const updatedEvent = {
+        ...selectedEvent,
+        extendedProps: {
+          ...selectedEvent.extendedProps,
+          status: newStatus,
+        },
+      };
+
+      setEvents((prevEvents) => 
+        prevEvents.map((event) => event.id === selectedEvent.id ? updatedEvent : event),
+      );
+      setSelectedEvent(updatedEvent);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : ERRORS.UPDATE.STATUS);
+    }
+  }, [selectedEvent]);
+
+  const handleCloseModal = useCallback(() => setSelectedEvent(null), []);
 
   return (
     <div className="w-full mx-auto py-8">
-        <PageTitle text="Ежедневник"/>
-
+      <PageTitle text="Ежедневник"/>
       <div className="flex justify-between items-center mb-8">
         <DashboardMenu/>
-
         <PsychologistSelector
           onSelect={setSelectedPsychologist}
-          selectedSlug={selectedPsychologist}
+          selectedId={selectedPsychologist}
         />
       </div>
 
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4" role="alert">
           {error}
         </div>
       )}
@@ -164,7 +115,7 @@ export default function DashboardSchedulePage() {
           headerToolbar={{
             left: 'prev,next today',
             center: 'title',
-            right: 'dayGridMonth,timeGridWeek,timeGridDay'
+            right: 'dayGridMonth,timeGridWeek,timeGridDay',
           }}
           initialView="timeGridWeek"
           editable={false}
@@ -178,10 +129,10 @@ export default function DashboardSchedulePage() {
           eventTimeFormat={{
             hour: '2-digit',
             minute: '2-digit',
-            hour12: false
+            hour12: false,
           }}
-          slotMinTime="09:00:00"
-          slotMaxTime="18:00:00"
+          slotMinTime={BUSINESS_HOURS.start}
+          slotMaxTime={BUSINESS_HOURS.end}
           allDaySlot={false}
           locale="ru"
         />
@@ -189,7 +140,7 @@ export default function DashboardSchedulePage() {
 
       <EventModal
         event={selectedEvent}
-        onClose={() => setSelectedEvent(null)}
+        onClose={handleCloseModal}
         onStatusChange={handleStatusChange}
       />
     </div>

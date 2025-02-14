@@ -1,13 +1,15 @@
-export enum AppointmentStatus {
-  WAITING = 'WAITING',
-  PASSED = 'PASSED',
-  CANCELED = 'CANCELED',
-  IN_PROGRESS = 'IN_PROGRESS',
-}
+export const AppointmentStatus = {
+  WAITING: 'WAITING',
+  IN_PROGRESS: 'IN_PROGRESS',
+  PASSED: 'PASSED',
+  CANCELED: 'CANCELED',
+} as const;
 
-export const appointmentStatusLabels: Record<AppointmentStatus, string> = {
-  [AppointmentStatus.WAITING]: 'Waiting',
-  [AppointmentStatus.PASSED]: 'Passed',
-  [AppointmentStatus.CANCELED]: 'Canceled',
-  [AppointmentStatus.IN_PROGRESS]: 'In progress',
-}
+export type AppointmentStatus = typeof AppointmentStatus[keyof typeof AppointmentStatus];
+
+export const AppointmentStatusLabels: Record<AppointmentStatus, string> = {
+  WAITING: 'Ожидает',
+  IN_PROGRESS: 'В процессе',
+  PASSED: 'Завершен',
+  CANCELED: 'Отменен',
+};

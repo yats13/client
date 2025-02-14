@@ -1,42 +1,36 @@
 'use client';
 
-import React from 'react';
-import { useActionState, useOptimistic } from "react";
-import { submitAppointment } from '@/app/types/services/submitAppointmentService';
+import { useActionState, useOptimistic } from 'react';
+import { submitAppointment } from '@/app/actions/submitAppointment';
 import Button from '@/app/components/button';
 import { ButtonVariant } from '@/app/types/enums/ButtonVariant';
 import { motion } from 'framer-motion';
-import { log } from 'console';
+import type { FormState } from '@/app/types/appointment';
+import type { FormAction, FormSubmitHandler } from '@/app/types/form';
+import { ERRORS } from '@/app/constants/errors';
+import { MESSAGES } from '@/app/constants/messages';
 
-interface AppointmentFormProps {
+type AppointmentFormProps = {
     selectedDate: Date;
     selectedTime: string;
     psychologistSlug: string;
-}
-
-interface AppointmentResponse {
-    name: string;
-    email: string;
-    phone: string;
-    psychologistSlug: string;
-    id: string;
-    dateTime: Date;
-    createdAt: Date;
-}
-
-interface FormState {
-    success: boolean;
-    error?: string;
-    appointment?: AppointmentResponse;
-}
+};
 
 const initialState: FormState = {
     success: false,
-    error: undefined,
 };
 
-const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selectedTime, psychologistSlug }) => {
-    const boundSubmitAppointment = async (prevState: FormState, formData: FormData) => {
+const inputClassName = 'w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500';
+
+export default function AppointmentForm({ selectedDate, selectedTime, psychologistSlug }: AppointmentFormProps) {
+    const boundSubmitAppointment: FormAction<FormState, FormData> = async (formData) => {
+        if (!formData.get('agree')) {
+            return {
+                success: false,
+                error: ERRORS.GENERIC.VALIDATION,
+            };
+        }
+
         formData.append('selectedDate', selectedDate.toLocaleString());
         formData.append('selectedTime', selectedTime);
         formData.append('psychologistSlug', psychologistSlug);
@@ -44,50 +38,58 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
         return submitAppointment(formData);
     };
 
-    const [state, formAction] = useActionState(boundSubmitAppointment, initialState);
+    const [state, formAction] = useActionState<FormState, FormData>(boundSubmitAppointment, initialState);
     const [optimistic, addOptimistic] = useOptimistic(false);
 
+    const handleSubmit: FormSubmitHandler = (formData) => {
+        addOptimistic(true);
+        formAction(formData);
+    };
+
     return (
-        <form action={formAction} className="w-full max-w-md mx-auto px-4">
+        <form action={handleSubmit} className="w-full max-w-md mx-auto px-4">
             <div className="flex flex-col md:flex-row md:justify-around gap-4 my-5">
                 {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
-                        Имя: {state.appointment?.name}
+                        {MESSAGES.LABELS.NAME}: {state.appointment?.name}
                     </p>
                 ) : (
                     <input
                         type="text"
                         name="name"
-                        placeholder="Имя"
-                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
+                        placeholder={MESSAGES.LABELS.NAME}
+                        required
+                        className={inputClassName}
                         disabled={state.success}
                     />
                 )}
 
                 {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
-                        Email: {state.appointment?.email}
+                        {MESSAGES.LABELS.EMAIL}: {state.appointment?.email}
                     </p>
                 ) : (
                     <input
                         type="email"
                         name="email"
-                        placeholder="Email"
-                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
+                        placeholder={MESSAGES.LABELS.EMAIL}
+                        required
+                        className={inputClassName}
                         disabled={state.success}
                     />
                 )}
 
                 {state.success ? (
                     <p className="text-gray-700 bg-transparent rounded-full px-4 py-2 text-center">
-                        Телефон: {state.appointment?.phone}
+                        {MESSAGES.LABELS.PHONE}: {state.appointment?.phone}
                     </p>
                 ) : (
                     <input
                         type="tel"
                         name="phone"
-                        placeholder="Телефон"
-                        className="w-full border border-gray-500 bg-transparent rounded-full px-4 py-2 placeholder-gray-500"
+                        placeholder={MESSAGES.LABELS.PHONE}
+                        required
+                        className={inputClassName}
                         disabled={state.success}
                     />
                 )}
@@ -99,23 +101,24 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                         id="agree"
                         name="agree"
                         type="checkbox"
+                        required
                         className="w-4 h-4 text-mint rounded-sm accent-mint"
                         disabled={state.success}
                     />
                     <label htmlFor="agree" className="ms-2 text-sm font-medium text-primary">
-                        Подтверждаю обработку данных
+                        {MESSAGES.FORM.AGREE}
                     </label>
                 </div>
             )}
 
-            <div className='flex justify-center my-5'>
+            <div className="flex justify-center my-5">
                 {state.success ? (
                     <p className="bg-mint py-2 px-6 rounded-full font-bold text-lg text-center">
-                        Запись успешно отправлена!
+                        {MESSAGES.FORM.SUCCESS}
                     </p>
                 ) : (
                     <Button
-                        label={optimistic ? "Отправка..." : "Записаться"}
+                        label={optimistic ? MESSAGES.FORM.SUBMITTING : MESSAGES.FORM.SUBMIT}
                         variant={ButtonVariant.Outline}
                         className="w-full md:w-auto"
                         type="submit"
@@ -128,7 +131,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
                     initial={{ y: 50, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     exit={{ y: 50, opacity: 0 }}
-                    transition={{ duration: 0.3, ease: "easeOut" }}
+                    transition={{ duration: 0.3, ease: 'easeOut' }}
                     className="py-2 text-center text-sm text-primary bg-purple rounded-t-3xl w-full"
                 >
                     {state.error}
@@ -136,6 +139,4 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({ selectedDate, selecte
             )}
         </form>
     );
-};
-
-export default AppointmentForm;
+}

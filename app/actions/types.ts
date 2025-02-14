@@ -2,7 +2,7 @@ export interface AppointmentResponse {
     name: string;
     email: string;
     phone: string;
-    psychologistSlug: string;
+    psychologistId: number;
     id: string;
     dateTime: Date;
     meetLink?: string;
