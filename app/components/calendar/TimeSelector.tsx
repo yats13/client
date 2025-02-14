@@ -14,7 +14,7 @@ interface TimeSelectorProps {
 export default function TimeSelector({ 
   selectedDate, 
   psychologistId, 
-  appointments, 
+  appointments = [],
   onTimeSelect, 
   selectedTime 
 }: TimeSelectorProps) {
@@ -22,30 +22,26 @@ export default function TimeSelector({
     const slots: { time: string; isDisabled: boolean }[] = [];
     const [startHour] = BUSINESS_HOURS.start.split(':').map(Number);
     const [endHour] = BUSINESS_HOURS.end.split(':').map(Number);
-
+console.log(appointments);
     // Get booked times for selected date and psychologist
-    const bookedTimes = appointments
+    const bookedTimes = (appointments || [])
       .filter(apt => {
         const aptDate = new Date(apt.start);
         const selectedDateTime = new Date(selectedDate);
-        console.log(aptDate.getFullYear(), selectedDateTime.getFullYear());
-        console.log(aptDate.getMonth(), selectedDateTime.getMonth());
-        console.log(aptDate.getDate(), selectedDateTime.getDate());
-        console.log(apt.extendedProps.psychologistId, psychologistId);
-        // Compare dates without time
-        return (
+        const isMatch = (
           apt.extendedProps.psychologistId === Number(psychologistId) &&
-          aptDate.getFullYear() === selectedDateTime.getFullYear() &&
-          aptDate.getMonth() === selectedDateTime.getMonth() &&
-          aptDate.getDate() === selectedDateTime.getDate() &&
-          apt.extendedProps.status !== AppointmentStatus.CANCELED // Don't block canceled appointments
+          aptDate.getFullYear() === selectedDate.getFullYear() &&
+          aptDate.getMonth() === selectedDate.getMonth() &&
+          aptDate.getDate() === selectedDate.getDate() &&
+          apt.extendedProps.status !== AppointmentStatus.CANCELED
         );
+        
+        return isMatch;
       })
       .map(apt => {
         const date = new Date(apt.start);
         return date.getHours();
       });
-    console.log(bookedTimes);
 
     // Generate time slots
     for (let hour = startHour; hour < endHour; hour++) {
@@ -55,9 +51,6 @@ export default function TimeSelector({
         isDisabled: bookedTimes.includes(hour)
       });
     }
-
-    console.log('Booked times:', bookedTimes); // Debug log
-    console.log('Generated slots:', slots); // Debug log
 
     return slots;
   }, [selectedDate, psychologistId, appointments]);
