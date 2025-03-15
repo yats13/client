@@ -39,7 +39,7 @@ export default function EventModal({ event, onClose, onStatusChange }: EventModa
               Статус: {AppointmentStatusLabels[event.extendedProps.status]}
             </p>
             <p className="text-sm text-gray-500">
-              Психолог: {event.extendedProps.psychologist.name}
+              Психолог: {event.extendedProps.psychologist?.name || 'Не указан'}
             </p>
           </div>
 
