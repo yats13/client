@@ -8,7 +8,7 @@ services:
       - .:/home/node/app/client
     environment:
       - DATABASE_URL=${DATABASE_URL}
-    command: "yarn run dev"
+    command: "npm run dev"
     expose:
       - "${INTERNAL_PORT}"    
     ports:
